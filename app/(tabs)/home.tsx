@@ -23,7 +23,7 @@ const Home = () => {
           <Button onPress={() => {
             setIsOpen(true);
             sheetRef.current?.expand();
-          }}>Nhấn vào</Button>
+          }}>Button Toggle</Button>
 
         </View>
         <BottomSheet
