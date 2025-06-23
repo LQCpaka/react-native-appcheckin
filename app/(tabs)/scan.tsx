@@ -77,8 +77,6 @@ export default function Index() {
     }
   };
 
-
-
   // ======================| DATA TABLE - FETCHING |=======================
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
 
