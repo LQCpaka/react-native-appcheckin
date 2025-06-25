@@ -1,9 +1,10 @@
 import { images } from "@/constant/images";
-import React from "react";
-import { View, StyleSheet, ImageBackground, Image, Text, ScrollView, TouchableOpacity } from "react-native";
-import { Avatar, Button, Divider } from "react-native-paper";
+import { useAuth } from "@/context/AuthContext";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from "expo-router";
+import React from "react";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Avatar, Divider } from "react-native-paper";
 
 
 const settings = [
@@ -36,11 +37,9 @@ const settings = [
 ]
 
 const ProfileScreen = () => {
+  const { userInfo, signOut } = useAuth();
   const router = useRouter();
 
-  const handleLogout = () => {
-    router.replace('/');
-  }
   return (
     <View className="flex-1 relative">
       <Image
@@ -54,7 +53,7 @@ const ProfileScreen = () => {
           size={120}
           source={images.avatarsample}
         />
-        <Text className="text-2xl text-center font-semibold mt-4">Lê Quốc Cần</Text>
+        <Text className="text-2xl text-center font-semibold mt-4">{userInfo?.name || "Tên Người Dùng"}</Text>
       </View>
       <Divider className="mx-4" style={{ marginTop: "35%" }} />
       <ScrollView className="mx-4">
@@ -93,7 +92,7 @@ const ProfileScreen = () => {
             flexDirection: 'row',
             alignItems: 'center',
           }}
-          onPress={handleLogout}
+          onPress={signOut}
           className='mt-4 rounded-md'
         >
           <Ionicons name='exit-sharp' size={24} color="#ff474c" />

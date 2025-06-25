@@ -1,4 +1,3 @@
-import { View, Text } from 'react-native'
 import { DataTable } from 'react-native-paper'
 
 interface TicketItem {

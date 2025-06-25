@@ -17,8 +17,8 @@ const Inventory = () => {
   const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
   useEffect(() => {
     axios.get(
-      `http://localhost:5010/list-tickers`,
-      { headers: { Accept: 'application/json' } })
+      `${process.env.EXPO_PUBLIC_BEAPI_URL}/list-tickers`,
+      { headers: { 'Content-Type': 'application/json' } })
 
       .then(response => {
         console.log('API response:', response.data);
