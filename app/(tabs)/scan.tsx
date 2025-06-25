@@ -152,21 +152,21 @@ export default function Index() {
               <DataTable.Title style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "black" }}>Đã kiểm</DataTable.Title>
             </DataTable.Header>
 
-            {/* Scroll View */}
-            <ScrollView style={{ maxHeight: '70%' }}>
-              {inventoryData.map((item) => (
-                <DataTable.Row key={item._id}
-                  onPress={() => {
-                    setSelectedItem(item);
-                    sheetRef.current?.expand();
-                  }}                >
-                  <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productId}</DataTable.Cell>
-                  <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productName}</DataTable.Cell>
-                  <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProduct}</DataTable.Cell>
-                  <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProductChecked}</DataTable.Cell>
-                </DataTable.Row>
-              ))}
-            </ScrollView>
+            {/* {/* Scroll View */} */}
+            {/* <ScrollView style={{ maxHeight: '70%' }}> */}
+            {/*   {inventoryData.map((item) => ( */}
+            {/*     <DataTable.Row key={item._id} */}
+            {/*       onPress={() => { */}
+            {/*         setSelectedItem(item); */}
+            {/*         sheetRef.current?.expand(); */}
+            {/*       }}                > */}
+            {/*       <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productId}</DataTable.Cell> */}
+            {/*       <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productName}</DataTable.Cell> */}
+            {/*       <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProduct}</DataTable.Cell> */}
+            {/*       <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProductChecked}</DataTable.Cell> */}
+            {/*     </DataTable.Row> */}
+            {/*   ))} */}
+            {/* </ScrollView> */}
           </DataTable>
         </View>
 
@@ -180,50 +180,47 @@ export default function Index() {
           }}
         >
           <BottomSheetView>
-            {selectedItem && (
-              <View style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                <DataTable>
-                  <DataTable.Header style={{ backgroundColor: '#dddddd', boxShadow: 'md' }} className="shadow-md rounded-md">
-                    <DataTable.Title style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "black" }}>THÔNG TIN SẢN PHẨM</DataTable.Title>
-                  </DataTable.Header>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Mã Sản Phẩm</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productId}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Tên Sản Phẩm</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productName}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Số Lượng</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProduct} {selectedItem.countAs}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Đã Kiểm Kê</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProductChecked}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Giá Sản Phẩm</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productPrice} VND</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Chính</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionA ? selectedItem.productDescriptionA : "Không Có"}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Phụ</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionB ? selectedItem.productDescriptionB : "Không Có"}</DataTable.Cell>
-                  </DataTable.Row>
-                </DataTable>
-
-                {/* <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}> */}
-                {/*   {selectedItem.productName} */}
-                {/* </Text> */}
-                {/* <Text>Mã sản phẩm: {selectedItem.productId}</Text> */}
-                {/* <Text>Số lượng: {selectedItem.amountProduct}</Text> */}
-                {/* <Text>Đã kiểm: {selectedItem.amountProductChecked}</Text> */}
-              </View>
-            )}
+            <View>
+              ProductItem
+            </View>
+            {/*   {selectedItem && ( */}
+            {/*     <View style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}> */}
+            {/*       <DataTable> */}
+            {/*         <DataTable.Header style={{ backgroundColor: '#dddddd', boxShadow: 'md' }} className="shadow-md rounded-md"> */}
+            {/*           <DataTable.Title style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "black" }}>THÔNG TIN SẢN PHẨM</DataTable.Title> */}
+            {/*         </DataTable.Header> */}
+            {/*         <DataTable.Row> */}
+            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Mã Sản Phẩm</DataTable.Cell> */}
+            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productId}</DataTable.Cell> */}
+            {/*         </DataTable.Row> */}
+            {/*         <DataTable.Row> */}
+            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Tên Sản Phẩm</DataTable.Cell> */}
+            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productName}</DataTable.Cell> */}
+            {/*         </DataTable.Row> */}
+            {/*         <DataTable.Row> */}
+            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Số Lượng</DataTable.Cell> */}
+            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProduct} {selectedItem.countAs}</DataTable.Cell> */}
+            {/*         </DataTable.Row> */}
+            {/*         <DataTable.Row> */}
+            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Đã Kiểm Kê</DataTable.Cell> */}
+            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProductChecked}</DataTable.Cell> */}
+            {/*         </DataTable.Row> */}
+            {/*         <DataTable.Row> */}
+            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Giá Sản Phẩm</DataTable.Cell> */}
+            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productPrice} VND</DataTable.Cell> */}
+            {/*         </DataTable.Row> */}
+            {/*         <DataTable.Row> */}
+            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Chính</DataTable.Cell> */}
+            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionA ? selectedItem.productDescriptionA : "Không Có"}</DataTable.Cell> */}
+            {/*         </DataTable.Row> */}
+            {/*         <DataTable.Row> */}
+            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Phụ</DataTable.Cell> */}
+            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionB ? selectedItem.productDescriptionB : "Không Có"}</DataTable.Cell> */}
+            {/*         </DataTable.Row> */}
+            {/*       </DataTable> */}
+            {/**/}
+            {/*     </View> */}
+            {/*   )} */}
           </BottomSheetView>
         </BottomSheet>
       </SafeAreaView>
