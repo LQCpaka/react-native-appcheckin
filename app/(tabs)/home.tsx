@@ -1,17 +1,44 @@
-import { View, Text, TouchableOpacity, FlatList, ImageBackground, Image } from 'react-native'
-import { Button } from 'react-native-paper'
+import { View, Dimensions, Text, TouchableOpacity, FlatList, ImageBackground, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRef, useState } from "react";
-import { FontAwesome, FontAwesome6 } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { images } from '@/constant/images';
 import { useRouter } from 'expo-router';
+import Svg, { Circle, Rect } from 'react-native-svg';
+import { PieChart } from 'react-native-chart-kit';
+
+const screenWidth = Dimensions.get('window').width;
+
+const data = [
+  {
+    name: 'Red',
+    population: 215,
+    color: '#f00',
+    legendFontColor: '#7F7F7F',
+    legendFontSize: 15,
+  },
+  {
+    name: 'Green',
+    population: 280,
+    color: '#0f0',
+    legendFontColor: '#7F7F7F',
+    legendFontSize: 15,
+  },
+  {
+    name: 'Blue',
+    population: 527,
+    color: '#00f',
+    legendFontColor: '#7F7F7F',
+    legendFontSize: 15,
+  },
+];
 const items = [
   { id: '1', icon: 'cube-scan', label: 'QUÉT KIỂM', urlItem: '(tabs)/scan' },
   { id: '2', icon: 'sticker-text', label: 'PHIẾU KIỂM', urlItem: '(tabs)/inventory' },
   { id: '3', icon: 'account', label: 'TÀI KHOẢN', urlItem: '(tabs)/profile' },
   { id: '4', icon: 'information', label: 'TRẠNG THÁI', urlItem: '(tabs)/home' },
 ];
+
+
 const Home = () => {
   const pushRoute = useRouter();
 
@@ -32,10 +59,25 @@ const Home = () => {
             borderBottomLeftRadius: 30,
           }}
         />
-        <Text className='text-2xl uppercase font-bold'>CHÀO MỪNG!</Text>
-        <Text className='text-lg uppercase font-semibold'>Lê Quốc Cần</Text>
-        <br />
-        <Text className='text-2xl uppercase font-bold'>Trạng thái: Active</Text>
+        <View style={{ position: 'absolute', top: 20, alignItems: 'center' }}>
+          <Text className='text-2xl uppercase font-bold'>CHÀO MỪNG!</Text>
+          <Text className='text-lg uppercase font-semibold'>Lê Quốc Cần</Text>
+          <Text className='text-2xl uppercase font-bold'>Trạng thái: Active</Text>
+        </View>
+
+        {/*===========================| PIE CHART |===========================*/}
+        <PieChart
+          data={data}
+          width={screenWidth}
+          height={220}
+          chartConfig={{
+            color: () => `#000`,
+          }}
+          accessor="population"
+          backgroundColor="transparent"
+          paddingLeft="15"
+          absolute
+        />
       </View>
       <FlatList
         data={items}
@@ -70,5 +112,4 @@ const Home = () => {
     </SafeAreaView >
   )
 }
-
 export default Home
