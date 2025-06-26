@@ -1,12 +1,14 @@
-import { View, Text, StyleSheet, FlatList } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Pressable, TextInput } from 'react-native'
+
 import { SafeAreaView } from 'react-native-safe-area-context'
 import axios from 'axios'
 import { useState, useEffect } from 'react'
-import { DataTable, Divider, Searchbar } from 'react-native-paper';
+import { DataTable, Divider, Modal, Searchbar, Portal, PaperProvider, Button } from 'react-native-paper';
 import TicketDataList from '@/components/TicketDataList';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const statusIcon = [
   {
@@ -40,8 +42,25 @@ interface InventoryItem {
   ticketStatus: string;
   createdDate: string;
 }
+const containerStyle = {
+  backgroundColor: 'white',
+  padding: 20,
+  borderRadius: 10,
+  margin: 20,
+};
+
+
 const Inventory = () => {
   const [ticketData, setTicketData] = useState<InventoryItem[]>([]);
+
+  //Modal state
+  const [visible, setVisible] = useState(false);
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
+
+  //Modal Selected Data
+
+  const [selectedItem, setSelectedItem] = useState(null);
 
   //Search Querry
   const [filteredData, setFilteredData] = useState(ticketData);
@@ -66,6 +85,7 @@ const Inventory = () => {
   }, [searchQuery, ticketData]);
 
 
+  //Data Fetching
   const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
   useEffect(() => {
     axios.get(
@@ -85,66 +105,111 @@ const Inventory = () => {
   }, []);
 
   return (
-    <SafeAreaView>
-      <View className='flex items-center justify-center h-12 bg-white shadow'>
-        <Text className='text-lg uppercase font-semibold'>Phiếu Kiểm Kê</Text>
-      </View>
-      <Searchbar
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        placeholder="Tìm kiếm phiếu kiểm kê"
-        placeholderTextColor="#aba4a4"
-        style={{
-          borderRadius: 10,
-          marginTop: 20,
-          marginHorizontal: 10,
-          shadowColor: '#000',
-          shadowOffset: { width: 1, height: 2 },
-          shadowOpacity: 1,
-          shadowRadius: 3,
-          elevation: 5, // Dùng cho Android
-          backgroundColor: '#fff',
-        }}
-      />
-      <Divider style={{ marginVertical: 25, marginHorizontal: 10 }} />
+    <PaperProvider>
+      <SafeAreaView >
+
+        <View style={{ zIndex: 99 }} className='flex items-center justify-center h-12 bg-white shadow'>
+          <Text className='text-lg uppercase font-semibold'>Phiếu Kiểm Kê</Text>
+        </View>
+        <Searchbar
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          placeholder="Tìm kiếm phiếu kiểm kê"
+          placeholderTextColor="#aba4a4"
+          style={{
+            borderRadius: 10,
+            marginTop: 20,
+            marginHorizontal: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 1, height: 2 },
+            shadowOpacity: 1,
+            shadowRadius: 3,
+            elevation: 5, // Dùng cho Android
+            backgroundColor: '#fff',
+          }}
+        />
+        <Divider style={{ marginVertical: 25, marginHorizontal: 10 }} />
 
 
-      <FlatList
-        style={{ height: '80%', marginBottom: 20 }}
-        data={filteredData}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => {
-          const matchedStatus = statusIcon.find(si => si.status === item.ticketStatus)
-          return (
-            <View className='mx-4 rounded-md shadow' style={{ backgroundColor: '#fff', padding: 10, marginBottom: 10 }}>
-              <View style={{
-                width: 0,
-                height: 0,
-                borderBottomWidth: 30,
-                borderRightWidth: 35,
-                borderBottomColor: 'transparent',
-                borderRightColor: `${matchedStatus && matchedStatus.backgroundColor}`,
-                position: 'absolute',
-                top: 0,
-                right: 0,
-              }}>
+        <FlatList
+          style={{ height: '80%', marginBottom: 20 }}
+          data={filteredData}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => {
+            const matchedStatus = statusIcon.find(si => si.status === item.ticketStatus)
+            return (
+              <Pressable
+                onPress={() => {
+                  setSelectedItem(item);
+                  showModal();
+                }
+
+                }
+                className='mx-4 rounded-md shadow'
+                style={{ backgroundColor: '#fff', padding: 10, marginBottom: 10 }}>
+                <View style={{
+                  width: 0,
+                  height: 0,
+                  borderBottomWidth: 30,
+                  borderRightWidth: 35,
+                  borderBottomColor: 'transparent',
+                  borderRightColor: `${matchedStatus && matchedStatus.backgroundColor}`,
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                }}>
+                </View>
+
+                {matchedStatus && matchedStatus.icon()}
+
+                {/* <Entypo name="check" size={15} color="yellow" /> */}
+                <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 10 }} >Id: {item._id} - {item.ticketName}</Text>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={{ color: '#aba4a4' }} >{new Date(item.createdDate).toLocaleString('vi-VN')}</Text>
+                  <Text style={{ color: '#aba4a4' }} >{item.ticketStatus}</Text>
+                </View>
+              </Pressable>
+            )
+          }}
+        />
+        <Portal>
+          <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={containerStyle}>
+            <View>
+              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                  <AntDesign name="infocirlceo" size={20} color="black" />
+                  <Text style={{ fontSize: 18, marginLeft: 8 }} >Thông Tin Phiếu Kiểm</Text>
+                </View>
+                <Pressable onPress={hideModal} >
+                  <AntDesign name="close" size={20} color="black" />
+                </Pressable>
+
               </View>
-
-              {matchedStatus && matchedStatus.icon()}
-
-              {/* <Entypo name="check" size={15} color="yellow" /> */}
-              <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 10 }} >Id: {item._id} - {item.ticketName}</Text>
-              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: '#aba4a4' }} >{new Date(item.createdDate).toLocaleString('vi-VN')}</Text>
-                <Text style={{ color: '#aba4a4' }} >{item.ticketStatus}</Text>
+              {selectedItem && (
+                <View className='flex gap-2'>
+                  <Text className='ml-2 font-semibold'>ID</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem._id}</TextInput>
+                  <Text className='ml-2 font-semibold'>Mã Phiếu</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketId}</TextInput>
+                  <Text className='ml-2 font-semibold'>Tên Phiếu</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketName}</TextInput>
+                  <Text className='ml-2 font-semibold'>Loại Phiếu</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketType === 'HaveInput' ? 'Có Dữ Liệu Đầu Vào' : 'Không Có Dữ Liệu Đầu Vào'}</TextInput>
+                  <Text className='ml-2 font-semibold'>Trạng Thái Phiếu</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketStatus}</TextInput>
+                </View>
+              )}
+              <View style={{ marginTop: 20, display: 'flex', flexDirection: 'row', gap: 4 }}>
+                <Button style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }} textColor='#fff' className='rounded-md'  >Chi Tiết Phiếu</Button>
+                <Button style={{ backgroundColor: '#1F8EF1', width: '50%', borderRadius: 8 }} textColor='#fff' onPress={hideModal} >Bắt Đầu Kiểm</Button>
               </View>
             </View>
-          )
-        }}
-      />
-      {/* <TicketDataList data={ticketData} /> */}
+          </Modal>
+        </Portal>
+        {/* <TicketDataList data={ticketData} /> */}
 
-    </SafeAreaView >
+      </SafeAreaView >
+    </PaperProvider>
   )
 }
 

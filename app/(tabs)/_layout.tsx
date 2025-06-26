@@ -6,7 +6,13 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 const _layout = () => {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          zIndex: 99,
+        }
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
