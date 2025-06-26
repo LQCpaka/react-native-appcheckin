@@ -9,6 +9,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { router } from 'expo-router';
 
 const statusIcon = [
   {
@@ -163,7 +164,10 @@ const Inventory = () => {
                 {matchedStatus && matchedStatus.icon()}
 
                 {/* <Entypo name="check" size={15} color="yellow" /> */}
-                <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 10 }} >Id: {item._id} - {item.ticketName}</Text>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <MaterialCommunityIcons name="alpha-t-box" size={18} color="black" style={{ marginRight: 5 }} />
+                  <Text style={{ fontSize: 16, fontWeight: '400' }} >{item.ticketId} - {item.ticketName}</Text>
+                </View>
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Text style={{ color: '#aba4a4' }} >{new Date(item.createdDate).toLocaleString('vi-VN')}</Text>
                   <Text style={{ color: '#aba4a4' }} >{item.ticketStatus}</Text>
@@ -186,30 +190,68 @@ const Inventory = () => {
 
               </View>
               {selectedItem && (
-                <View className='flex gap-2'>
-                  <Text className='ml-2 font-semibold'>ID</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem._id}</TextInput>
-                  <Text className='ml-2 font-semibold'>Mã Phiếu</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketId}</TextInput>
-                  <Text className='ml-2 font-semibold'>Tên Phiếu</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketName}</TextInput>
-                  <Text className='ml-2 font-semibold'>Loại Phiếu</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketType === 'HaveInput' ? 'Có Dữ Liệu Đầu Vào' : 'Không Có Dữ Liệu Đầu Vào'}</TextInput>
-                  <Text className='ml-2 font-semibold'>Trạng Thái Phiếu</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketStatus}</TextInput>
-                </View>
+                <>
+                  <View className='flex gap-2'>
+                    <Text className='ml-2 font-semibold'>ID</Text>
+                    <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem._id}</TextInput>
+                    <Text className='ml-2 font-semibold'>Mã Phiếu</Text>
+                    <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketId}</TextInput>
+                    <Text className='ml-2 font-semibold'>Tên Phiếu</Text>
+                    <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketName}</TextInput>
+                    <Text className='ml-2 font-semibold'>Loại Phiếu</Text>
+                    <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketType === 'HaveInput' ? 'Có Dữ Liệu Đầu Vào' : 'Không Có Dữ Liệu Đầu Vào'}</TextInput>
+                    <Text className='ml-2 font-semibold'>Trạng Thái Phiếu</Text>
+                    <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>{selectedItem.ticketStatus}</TextInput>
+                  </View>
+                  <View style={{ marginTop: 20, display: 'flex', flexDirection: 'row', gap: 4 }}>
+                    {selectedItem.ticketStatus === 'Phiếu Đã Xác Nhận' ? (
+                      <>
+                        <Button
+                          onPress={() => {
+                            router.push({
+                              pathname: '/(tabs)/scan',
+                              params: { ticketId: selectedItem.ticketId },
+                            });
+                            hideModal();
+                          }}
+                          style={{ backgroundColor: '#1F8EF1', width: '50%', borderRadius: 8 }}
+                          textColor='#fff'                         >
+                          Bắt Đầu Kiểm
+                        </Button>
+                        <Button
+                          onPress={() => {
+                            router.push({
+                              pathname: '/(screens)/detailinventory',
+                              params: { ticketId: selectedItem.ticketId },
+                            });
+                            hideModal();
+                          }}
+                          style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }}
+                          textColor='#fff' className='rounded-md'  >Chi Tiết Phiếu</Button>
+                      </>
+                    ) : (
+                      <Button
+                        onPress={() => {
+                          router.push({
+                            pathname: '/(screens)/detailinventory',
+                            params: { ticketId: selectedItem.ticketId },
+                          });
+                          hideModal();
+                        }}
+                        style={{ backgroundColor: '#FF6B00', width: '100%', borderRadius: 8 }}
+                        textColor='#fff' className='rounded-md'  >Chi Tiết Phiếu</Button>
+
+                    )}
+                  </View>
+                </>
               )}
-              <View style={{ marginTop: 20, display: 'flex', flexDirection: 'row', gap: 4 }}>
-                <Button style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }} textColor='#fff' className='rounded-md'  >Chi Tiết Phiếu</Button>
-                <Button style={{ backgroundColor: '#1F8EF1', width: '50%', borderRadius: 8 }} textColor='#fff' onPress={hideModal} >Bắt Đầu Kiểm</Button>
-              </View>
             </View>
           </Modal>
         </Portal>
         {/* <TicketDataList data={ticketData} /> */}
 
       </SafeAreaView >
-    </PaperProvider>
+    </PaperProvider >
   )
 }
 

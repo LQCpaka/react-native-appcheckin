@@ -9,6 +9,8 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useGlobalSearchParams } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
 //====================| DATA FETCHING |==========================
 
 interface InventoryItem {
@@ -81,22 +83,22 @@ export default function Index() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
 
   const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
-  useEffect(() => {
-    axios.get(
-      `${API_URL}/inventory`,
-      { headers: { Accept: 'application/json' } })
-
-      .then(response => {
-        console.log('API response:', response.data);
-        if (Array.isArray(response.data)) {
-          setInventoryData(response.data);
-        } else {
-          console.error('Error: API did not return an array', response.data);
-          setInventoryData([]);
-        }
-      })
-      .catch(error => console.error('Error fetching inventory:', error));
-  }, []);
+  // useEffect(() => {
+  //   axios.get(
+  //     `${API_URL}/inventory`,
+  //     { headers: { Accept: 'application/json' } })
+  //
+  //     .then(response => {
+  //       console.log('API response:', response.data);
+  //       if (Array.isArray(response.data)) {
+  //         setInventoryData(response.data);
+  //       } else {
+  //         console.error('Error: API did not return an array', response.data);
+  //         setInventoryData([]);
+  //       }
+  //     })
+  //     .catch(error => console.error('Error fetching inventory:', error));
+  // }, []);
 
   // =================| BOTTOM SHEET DATA |===========================
 
@@ -106,123 +108,44 @@ export default function Index() {
 
   const [selectedItem, setSelectedItem] = useState(null);
 
+  const { ticketId } = useGlobalSearchParams();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView className='flex-1'>
         <View className='flex items-center justify-center h-12 bg-white shadow mb-4'>
           <Text className='text-lg uppercase font-semibold'>Quét Mã</Text>
         </View>
-        <View style={{ marginHorizontal: '7%' }}>
-          <View className="flex flex-row items-center justify-between mb-2" style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: '2%' }}>
-            <Text >
-              Quét QR bằng nút trái/phải trên EF501
-            </Text>
-            <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />
-          </View>
-          <Divider className="mb-4" />
 
-
-          {/* TextInput ẩn */}
-          <TextInput
-            ref={inputRef}
-            value={qrText}
-            onChangeText={(text) => handleScan(text)} // Gọi handleScan khi có dữ liệu mới
-            autoFocus={true}
-            blurOnSubmit={false}
-            showSoftInputOnFocus={false}
-            style={{ borderWidth: 0.5, borderColor: '#bab1b1' }} // Ẩn TextInput
-            className=" rounded-md mb-5"
-          />
-          <View className="mx-2" style={{ flexDirection: 'row', justifyContent: 'center', gap: '1%' }}>
-            <TouchableOpacity className="rounded-md shadow-md py-4" style={{ backgroundColor: '#007BFF', width: '50%' }} onPress={handleClearText} >
-              <Text className="font-semibold text-white uppercase text-center">Nhập Mới</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="rounded-md py-4" style={{ backgroundColor: '#28A745', width: '50%' }} onPress={handleBatchUpdate}>
-              <Text className="font-semibold text-white uppercase text-center">Cập Nhật</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <Divider style={{ margin: '4%' }} />
-        <View className="mx-4">
-          <DataTable>
-            <DataTable.Header style={{ backgroundColor: '#dddddd', boxShadow: 'md' }} className="shadow-md rounded-md">
-              <DataTable.Title style={{ flex: 1.5, justifyContent: 'center', }} textStyle={{ color: "black" }} >Mã sản phẩm</DataTable.Title>
-              <DataTable.Title style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "black" }}>Tên sản phẩm</DataTable.Title>
-              <DataTable.Title style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "black" }}>Số lượng</DataTable.Title>
-              <DataTable.Title style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "black" }}>Đã kiểm</DataTable.Title>
-            </DataTable.Header>
-
-            {/* {/* Scroll View */} */}
-            {/* <ScrollView style={{ maxHeight: '70%' }}> */}
-            {/*   {inventoryData.map((item) => ( */}
-            {/*     <DataTable.Row key={item._id} */}
-            {/*       onPress={() => { */}
-            {/*         setSelectedItem(item); */}
-            {/*         sheetRef.current?.expand(); */}
-            {/*       }}                > */}
-            {/*       <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productId}</DataTable.Cell> */}
-            {/*       <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productName}</DataTable.Cell> */}
-            {/*       <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProduct}</DataTable.Cell> */}
-            {/*       <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProductChecked}</DataTable.Cell> */}
-            {/*     </DataTable.Row> */}
-            {/*   ))} */}
-            {/* </ScrollView> */}
-          </DataTable>
-        </View>
-
-        <BottomSheet
-          ref={sheetRef}
-          enablePanDownToClose
-          snapPoints={snapPoint}
-          index={-1}
-          onClose={() => {
-            setSelectedItem(null);
-          }}
-        >
-          <BottomSheetView>
-            <View>
-              ProductItem
+        {/* SCAN DATA SECTION  */}
+        <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%' }}>
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: 4 }}>
+            <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
+              <MaterialCommunityIcons name="qrcode-scan" size={20} color="#aba4a4" />
+              <Text className="font-semibold" style={{ marginLeft: 10, color: '#aba4a4' }}>{!ticketId ? 'Vui Lòng Chọn Phiếu' : ticketId}</Text>
             </View>
-            {/*   {selectedItem && ( */}
-            {/*     <View style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}> */}
-            {/*       <DataTable> */}
-            {/*         <DataTable.Header style={{ backgroundColor: '#dddddd', boxShadow: 'md' }} className="shadow-md rounded-md"> */}
-            {/*           <DataTable.Title style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "black" }}>THÔNG TIN SẢN PHẨM</DataTable.Title> */}
-            {/*         </DataTable.Header> */}
-            {/*         <DataTable.Row> */}
-            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Mã Sản Phẩm</DataTable.Cell> */}
-            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productId}</DataTable.Cell> */}
-            {/*         </DataTable.Row> */}
-            {/*         <DataTable.Row> */}
-            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Tên Sản Phẩm</DataTable.Cell> */}
-            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productName}</DataTable.Cell> */}
-            {/*         </DataTable.Row> */}
-            {/*         <DataTable.Row> */}
-            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Số Lượng</DataTable.Cell> */}
-            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProduct} {selectedItem.countAs}</DataTable.Cell> */}
-            {/*         </DataTable.Row> */}
-            {/*         <DataTable.Row> */}
-            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Đã Kiểm Kê</DataTable.Cell> */}
-            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProductChecked}</DataTable.Cell> */}
-            {/*         </DataTable.Row> */}
-            {/*         <DataTable.Row> */}
-            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Giá Sản Phẩm</DataTable.Cell> */}
-            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productPrice} VND</DataTable.Cell> */}
-            {/*         </DataTable.Row> */}
-            {/*         <DataTable.Row> */}
-            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Chính</DataTable.Cell> */}
-            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionA ? selectedItem.productDescriptionA : "Không Có"}</DataTable.Cell> */}
-            {/*         </DataTable.Row> */}
-            {/*         <DataTable.Row> */}
-            {/*           <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Phụ</DataTable.Cell> */}
-            {/*           <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionB ? selectedItem.productDescriptionB : "Không Có"}</DataTable.Cell> */}
-            {/*         </DataTable.Row> */}
-            {/*       </DataTable> */}
-            {/**/}
-            {/*     </View> */}
-            {/*   )} */}
-          </BottomSheetView>
-        </BottomSheet>
+            <Ionicons name="reload-sharp" size={20} color="#aba4a4" style={{ marginTop: 10, }} />
+          </View>
+          <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginTop: '3%' }} />
+          <View style={{ marginVertical: '3%', marginHorizontal: 15 }}>
+            <View className='flex gap-2'>
+              <Text className='ml-2 font-semibold'>Mã Sản Phẩm</Text>
+              <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>12837192837</TextInput>
+              <Text className='ml-2 font-semibold'>Tên Sản Phẩm</Text>
+              <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>Thịt gà</TextInput>
+            </View>
+            <View style={{ display: 'flex', gap: 5, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Button style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }} textColor='#fff'  >Hủy Phiếu Kiểm</Button>
+              <Button
+                style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }}
+                textColor='#fff' className='rounded-md'
+              >
+                Cập Nhật
+              </Button>
+            </View>
+          </View>
+        </View>
+
+        {/* DATA LOAD SECTION */}
       </SafeAreaView>
 
     </GestureHandlerRootView >
