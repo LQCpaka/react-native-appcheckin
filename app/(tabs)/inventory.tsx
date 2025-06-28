@@ -210,7 +210,10 @@ const Inventory = () => {
                           onPress={() => {
                             router.push({
                               pathname: '/(tabs)/scan',
-                              params: { ticketId: selectedItem.ticketId },
+                              params: {
+                                ticketId: selectedItem.ticketId,
+                                ticketType: selectedItem.ticketType,
+                              },
                             });
                             hideModal();
                           }}

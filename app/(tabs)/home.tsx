@@ -47,8 +47,8 @@ const Home = () => {
   }
   return (
     <SafeAreaView className='flex-1'>
-      <View className='flex items-center bg- justify-center shadow-md'
-        style={{ backgroundColor: "#FFFFFF", borderBottomRightRadius: 30, borderBottomLeftRadius: 30, height: "70%" }}>
+      <View className='flex items-center justify-center shadow-md'
+        style={{ backgroundColor: "#FFFFFF", position: 'relative', borderBottomRightRadius: 30, borderBottomLeftRadius: 30, zIndex: 10, height: "70%" }}>
         <Image source={images.homebg}
           style={{
             position: 'absolute',
@@ -111,7 +111,7 @@ const Home = () => {
       <FlatList
         data={items}
         numColumns={2}
-        style={{ position: 'absolute', width: "90%", bottom: 20, zIndex: 99, alignSelf: 'center', padding: 10 }}
+        style={{ position: 'absolute', width: "90%", bottom: 0, zIndex: 99, alignSelf: 'center', padding: 10, elevation: 10, }}
         keyExtractor={(item) => item.id}
         columnWrapperStyle={{ gap: 10, marginBottom: 10 }} // Khoảng cách hàng và giữa cột
         renderItem={({ item }) => (

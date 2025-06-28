@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useRef, useState, useEffect } from "react";
-import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity } from "react-native";
+import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData } from "react-native";
 import { Button, DataTable, Divider } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -9,6 +9,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Entypo from '@expo/vector-icons/Entypo';
 import { useGlobalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 //====================| DATA FETCHING |==========================
@@ -30,8 +31,6 @@ export default function Index() {
 
 
   //===========================| SCAN |================================
-  const [qrText, setQrText] = useState("");
-
   const inputRef = useRef<TextInput>(null);
 
   // Khi component mount, focus TextInput ẩn luôn để nhận input scan
@@ -39,26 +38,28 @@ export default function Index() {
     inputRef.current?.focus();
   }, []);
 
-  const handleClearText = () => {
-    setQrText("");
-  }
+  const [scanInput, setScanInput] = useState('');
+  const [scannedCodes, setScannedCodes] = useState<string[]>([]);
 
   const handleScan = (text: string) => {
-    setQrText(text);
+    if (text.endsWith('\n')) {
+      const clean = text.trim();
+      setScannedCodes(prev => [...prev, clean]);
+      setScanInput('');
+    } else {
+      setScanInput(text);
+    }
+  }
 
-    setInventoryData(prevData => {
-      const updated = prevData.map(item => {
-        if (item.productId === text) {
-          return {
-            ...item,
-            amountProductChecked: item.amountProductChecked + 1 // hoặc += số lượng nếu QR mang thông tin số lượng
-          };
-        }
-        return item;
-      });
-      return updated;
-    });
+  const handleSubmit = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+    const scanned = e.nativeEvent.text.trim();
+    if (scanned.length > 0) {
+      setScannedCodes(prev => [...prev, scanned]);
+      setScanInput(''); // reset input
+    }
   };
+
+
   const handleBatchUpdate = async () => {
     try {
       const updates = inventoryData.map(item => ({
@@ -108,7 +109,7 @@ export default function Index() {
 
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const { ticketId } = useGlobalSearchParams();
+  const { ticketId, ticketType } = useGlobalSearchParams();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView className='flex-1'>
@@ -128,10 +129,27 @@ export default function Index() {
           <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginTop: '3%' }} />
           <View style={{ marginVertical: '3%', marginHorizontal: 15 }}>
             <View className='flex gap-2'>
-              <Text className='ml-2 font-semibold'>Mã Sản Phẩm</Text>
-              <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>12837192837</TextInput>
-              <Text className='ml-2 font-semibold'>Tên Sản Phẩm</Text>
-              <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>Thịt gà</TextInput>
+              <TextInput
+                value={scanInput}
+                onChangeText={setScanInput}
+                onSubmitEditing={handleSubmit}
+                autoFocus
+                blurOnSubmit={false}
+              />
+
+              {ticketType === 'HaveInput' ? (
+                <>
+                  <Text className='ml-2 font-semibold'>Mã Sản Phẩm</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>12837192837</TextInput>
+                  <Text className='ml-2 font-semibold'>Tên Sản Phẩm</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>Thịt gà</TextInput>
+                </>
+              ) : (
+                <>
+                  <Text className='ml-2 font-semibold'>Mã Sản Phẩm</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>12837192837</TextInput>
+                </>
+              )}
             </View>
             <View style={{ display: 'flex', gap: 5, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Button style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }} textColor='#fff'  >Hủy Phiếu Kiểm</Button>
@@ -146,6 +164,43 @@ export default function Index() {
         </View>
 
         {/* DATA LOAD SECTION */}
+        <View>
+          <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
+            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginHorizontal: '4%', padding: '4%' }}>
+              <Text className='text-xl font-semibold '>Danh Sách Sản Phẩm</Text>
+            </View>
+            <View style={{ backgroundColor: '#fff', height: '68%' }}>
+              <View className="mx-4 shadow-md" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                  <Entypo name="box" size={40} color="#aba4a4" className="mr-4" />
+                  <View>
+                    <Text style={{ fontSize: 16, fontWeight: 'semibold' }} >Tên Sản Phẩm</Text>
+                    <Text style={{ fontSize: 16, fontWeight: 'semibold', color: '#787474' }} >01231283</Text>
+                  </View>
+                </View>
+
+                {/* AMOUNT PRODUCT  */}
+                <View>
+                  <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 10 }}>100</Text>
+                </View>
+              </View>
+              <FlatList
+                data={scannedCodes}
+                style={{ display: "none" }}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <View style={{ padding: 10, borderBottomWidth: 1, borderColor: '#ddd' }}>
+                    <Text>{item}</Text>
+                  </View>
+                )}
+                ListEmptyComponent={
+                  <Text style={{ textAlign: 'center', marginTop: 20 }}>Chưa có mã nào được quét</Text>
+                }
+              />
+
+            </View>
+          </View>
+        </View>
       </SafeAreaView>
 
     </GestureHandlerRootView >
