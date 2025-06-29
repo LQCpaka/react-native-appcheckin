@@ -1,16 +1,16 @@
 import axios from "axios";
 import { useRef, useState, useEffect } from "react";
+import { useGlobalSearchParams } from "expo-router";
+
 import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData } from "react-native";
 import { Button, DataTable, Divider } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
-import { useGlobalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 //====================| DATA FETCHING |==========================
 
@@ -84,22 +84,47 @@ export default function Index() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
 
   const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
-  // useEffect(() => {
-  //   axios.get(
-  //     `${API_URL}/inventory`,
-  //     { headers: { Accept: 'application/json' } })
-  //
-  //     .then(response => {
-  //       console.log('API response:', response.data);
-  //       if (Array.isArray(response.data)) {
-  //         setInventoryData(response.data);
-  //       } else {
-  //         console.error('Error: API did not return an array', response.data);
-  //         setInventoryData([]);
-  //       }
-  //     })
-  //     .catch(error => console.error('Error fetching inventory:', error));
-  // }, []);
+
+  useEffect(() => {
+    // ===================| IF TICKET IS HAVE INPUT  |===================
+    if (ticketType === "HaveInput") {
+      axios.get(
+        `${API_URL}/inventory/${ticketId}`,
+        { headers: { Accept: 'application/json' } })
+
+        .then(response => {
+          console.log('API response:', response.data);
+          if (Array.isArray(response.data)) {
+            setInventoryData(response.data);
+          } else {
+            console.error('Error: API did not return an array', response.data);
+            setInventoryData([]);
+          }
+        })
+        .catch(error => console.error('Error fetching inventory:', error));
+
+    }
+    // ===================| IF TICKET IS HAVE NO INPUT  |===================
+    else if (ticketType === "NoInput") {
+      axios.get(
+        `${API_URL}/no-input/${ticketId}`,
+        { headers: { Accept: 'application/json' } })
+
+        .then(response => {
+          console.log('API response:', response.data);
+          if (Array.isArray(response.data)) {
+            setInventoryData(response.data);
+          } else {
+            console.error('Error: API did not return an array', response.data);
+            setInventoryData([]);
+          }
+        })
+        .catch(error => console.error('Error fetching inventory:', error));
+
+    } else {
+      return;
+    }
+  }, []);
 
   // =================| BOTTOM SHEET DATA |===========================
 
@@ -118,7 +143,7 @@ export default function Index() {
         </View>
 
         {/* SCAN DATA SECTION  */}
-        <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%' }}>
+        <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
           <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: 4 }}>
             <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
               <MaterialCommunityIcons name="qrcode-scan" size={20} color="#aba4a4" />
@@ -135,6 +160,7 @@ export default function Index() {
                 onSubmitEditing={handleSubmit}
                 autoFocus
                 blurOnSubmit={false}
+                style={{ position: 'absolute', top: 0, right: -100, }}
               />
 
               {ticketType === 'HaveInput' ? (
@@ -152,7 +178,7 @@ export default function Index() {
               )}
             </View>
             <View style={{ display: 'flex', gap: 5, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }} textColor='#fff'  >Hủy Phiếu Kiểm</Button>
+              <Button style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }} textColor='#fff'>Hủy Phiếu Kiểm</Button>
               <Button
                 style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }}
                 textColor='#fff' className='rounded-md'
@@ -163,6 +189,7 @@ export default function Index() {
           </View>
         </View>
 
+
         {/* DATA LOAD SECTION */}
         <View>
           <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
@@ -170,8 +197,13 @@ export default function Index() {
               <Text className='text-xl font-semibold '>Danh Sách Sản Phẩm</Text>
             </View>
             <View style={{ backgroundColor: '#fff', height: '68%' }}>
-              <View className="mx-4 shadow-md" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+
+              {/* PRODUCT ITEM */}
+              <TouchableOpacity
+                className="rounded-lg mx-4"
+                style={{ display: 'flex', padding: 10, flexDirection: 'row', justifyContent: 'space-between', shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 1, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5 }}
+              >
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', }}>
                   <Entypo name="box" size={40} color="#aba4a4" className="mr-4" />
                   <View>
                     <Text style={{ fontSize: 16, fontWeight: 'semibold' }} >Tên Sản Phẩm</Text>
@@ -180,10 +212,12 @@ export default function Index() {
                 </View>
 
                 {/* AMOUNT PRODUCT  */}
-                <View>
-                  <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 10 }}>100</Text>
+                <View style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: '#787474' }} >Số lượng</Text>
+                  <Text style={{ fontSize: 25, fontWeight: 'bold' }}>1</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
+
               <FlatList
                 data={scannedCodes}
                 style={{ display: "none" }}

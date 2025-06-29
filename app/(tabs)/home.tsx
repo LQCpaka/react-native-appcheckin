@@ -5,6 +5,8 @@ import { images } from '@/constant/images';
 import { useRouter } from 'expo-router';
 import Svg, { Circle, Rect } from 'react-native-svg';
 import { PieChart } from 'react-native-chart-kit';
+import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -38,13 +40,95 @@ const items = [
   { id: '4', icon: 'information', label: 'TRẠNG THÁI', urlItem: '(tabs)/home' },
 ];
 
-
+interface TicketItem {
+  _id: string;
+  ticketId: string;
+  ticketName: string;
+  ticketType: string;
+  ticketStatus: string;
+  createdDate: string;
+}
 const Home = () => {
   const pushRoute = useRouter();
+
+  const [ticket, setTicket] = useState<TicketItem[]>([]);
+
+  const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
+  useEffect(() => {
+    axios.get(`${API_URL}/list-tickers`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(response => {
+        if (Array.isArray(response.data)) {
+          setTicket(response.data);
+        } else {
+          console.error("Data is not an array:", response.data);
+          setTicket([]);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching data:", error);
+      })
+  }, [])
 
   const handlePress = (url: any) => {
     pushRoute.push(url);
   }
+
+  const chartData = useMemo(() => {
+    const counts = {
+      'Phiếu Mới': 0,
+      'Phiếu Chờ Xác Nhận': 0,
+      'Phiếu Đã Xác Nhận': 0,
+      'Kiểm Kê Hoàn Tất': 0
+    };
+
+    ticket.forEach(item => {
+      if (counts[item.ticketStatus] !== undefined) {
+        counts[item.ticketStatus]++;
+      }
+    });
+
+    return [
+      {
+        name: 'Phiếu Mới',
+        population: counts['Phiếu Mới'],
+        color: '#FF6384',
+        legendFontColor: '#333',
+        legendFontSize: 13
+      },
+      {
+        name: 'Phiếu Chờ Xác Nhận',
+        population: counts['Phiếu Chờ Xác Nhận'],
+        color: '#FFCD56',
+        legendFontColor: '#333',
+        legendFontSize: 13
+      },
+      {
+        name: 'Phiếu Đã Xác Nhận',
+        population: counts['Phiếu Đã Xác Nhận'],
+        color: '#36A2EB',
+        legendFontColor: '#333',
+        legendFontSize: 13
+      },
+      {
+        name: 'Kiểm Kê Hoàn Tất',
+        population: counts['Kiểm Kê Hoàn Tất'],
+        color: '#4BC0C0',
+        legendFontColor: '#333',
+        legendFontSize: 13
+      }
+    ];
+  }, [ticket]);
+
+  const [animatedData, setAnimatedData] = useState([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimatedData(chartData), 300); // 300ms delay
+    return () => clearTimeout(timer);
+  }, [chartData]);
+
   return (
     <SafeAreaView className='flex-1'>
       <View className='flex items-center justify-center shadow-md'
@@ -96,12 +180,11 @@ const Home = () => {
 
         {/*===========================| PIE CHART |===========================*/}
         <PieChart
-          data={data}
+
+          data={animatedData}
           width={screenWidth}
           height={220}
-          chartConfig={{
-            color: () => `#000`,
-          }}
+          chartConfig={{ color: () => `#000` }}
           accessor="population"
           backgroundColor="transparent"
           paddingLeft="15"
@@ -126,9 +209,11 @@ const Home = () => {
                 color="#aba4a4"
                 size={40}
               />
-              <View className="absolute top-[-5] right-0 bg-red-500 rounded-full w-5 h-5 justify-center items-center">
-                <Text className="text-white text-xs font-bold">3</Text>
-              </View>
+              {item.label === 'PHIẾU KIỂM' && ticket.length > 0 && (
+                <View className="absolute top-[-5] right-2 bg-red-500 rounded-full w-5 h-5 justify-center items-center">
+                  <Text className="text-white text-xs font-bold">{ticket.length}</Text>
+                </View>
+              )}
             </View>
             <Text className='font-semibold text-center' style={{ color: "#aba4a4" }}>
               {item.label}
