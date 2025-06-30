@@ -1,7 +1,7 @@
 import axios from "axios";
-import { useRef, useState, useEffect } from "react";
-import { router, useGlobalSearchParams } from "expo-router";
-import { create } from 'zustand';
+import { useRef, useState, useEffect, useCallback } from "react";
+import { router, useFocusEffect, useGlobalSearchParams } from "expo-router";
+
 import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData, Image } from "react-native";
 import { Button, DataTable, Divider } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +13,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Feather from '@expo/vector-icons/Feather';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { images } from "@/constant/images";
+
+import { useInventoryStore } from '@/libs/inventoryStore';
 //====================| DATA FETCHING |==========================
 
 interface InventoryItem {
@@ -31,17 +35,26 @@ interface InventoryItem {
 
 export default function Index() {
 
+  const { ticketId, ticketType } = useGlobalSearchParams();
 
   //===========================| SCAN |================================
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef(null);
 
   // Khi component mount, focus TextInput ẩn luôn để nhận input scan
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100); // Delay nhẹ để đảm bảo UI đã render
 
+      return () => clearTimeout(timeout);
+    }, [])
+  );
   const [scanInput, setScanInput] = useState('');
-  // const [scannedCodes, setScannedCodes] = useState<string[]>([]);
+
   const [scannedItems, setScannedItems] = useState<InventoryItem[]>([]);
   const displayedItems = scannedItems.slice(0, 5);
 
@@ -86,72 +99,47 @@ export default function Index() {
   };
 
 
-  const handleBatchUpdate = async () => {
-    try {
-      const updates = inventoryData.map(item => ({
-        _id: item._id,
-        updatedData: {
-          amountProductChecked: item.amountProductChecked
-        }
-      }));
-
-      const res = await axios.put(`${API_URL}/update-multinventory`, {
-        updates
-      });
-
-      alert('Cập nhật thành công!');
-    } catch (err) {
-      console.error('Batch update failed:', err);
-      alert('Lỗi cập nhật!');
-    }
-  };
-
   // ======================| DATA TABLE - FETCHING |=======================
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
 
   const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
 
   useEffect(() => {
-    // ===================| IF TICKET IS HAVE INPUT  |===================
-    if (ticketType === "HaveInput") {
-      axios.get(
-        `${API_URL}/inventory/${ticketId}`,
-        { headers: { Accept: 'application/json' } })
+    if (ticketId === null || ticketType === null) return; // ⛔ Tránh fetch khi thiếu dữ liệu
 
-        .then(response => {
-          console.log('API response:', response.data);
-          if (Array.isArray(response.data)) {
-            setInventoryData(response.data);
-          } else {
-            console.error('Error: API did not return an array', response.data);
-            setInventoryData([]);
-          }
-        })
-        .catch(error => console.error('Error fetching inventory:', error));
+    setScannedItems([]);        // Reset danh sách đã scan
+    setInventoryData([]);       // Xóa dữ liệu cũ trước khi load mới
 
-    }
-    // ===================| IF TICKET IS HAVE NO INPUT  |===================
-    else if (ticketType === "NoInput") {
-      axios.get(
-        `${API_URL}/no-input/${ticketId}`,
-        { headers: { Accept: 'application/json' } })
+    const fetchData = async () => {
+      try {
+        let endpoint = '';
 
-        .then(response => {
-          console.log('API response:', response.data);
-          if (Array.isArray(response.data)) {
-            setInventoryData(response.data);
-          } else {
-            console.error('Error: API did not return an array', response.data);
-            setInventoryData([]);
-          }
-        })
-        .catch(error => console.error('Error fetching inventory:', error));
+        if (ticketType === 'HaveInput') {
+          endpoint = `${API_URL}/inventory/${ticketId}`;
+        } else if (ticketType === 'NoInput') {
+          endpoint = `${API_URL}/no-input/${ticketId}`;
+        } else {
+          console.warn('Loại ticket không hợp lệ:', ticketType);
+          return;
+        }
 
-    } else {
-      return;
-    }
-  }, []);
+        const response = await axios.get(endpoint, {
+          headers: { Accept: 'application/json' },
+        });
 
+        if (Array.isArray(response.data)) {
+          setInventoryData(response.data);
+        } else {
+          console.error('❗ API không trả về array:', response.data);
+          setInventoryData([]);
+        }
+      } catch (error) {
+        console.error('❌ Lỗi khi fetch dữ liệu:', error);
+      }
+    };
+
+    fetchData();
+  }, [ticketId, ticketType]); // 🔁 Theo dõi cả 2 giá trị
   // =================| BOTTOM SHEET DATA |===========================
 
   const sheetRef = useRef<BottomSheetMethods>(null);
@@ -160,7 +148,11 @@ export default function Index() {
 
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const { ticketId, ticketType } = useGlobalSearchParams();
+  const [isEditA, setIsEditA] = useState(false);
+  const [isEditB, setIsEditB] = useState(false);
+
+  const [editValue, setEditValue] = useState(selectedItem?.productDescriptionB || '');
+
   return (
     <SafeAreaView className='flex-1'>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -195,7 +187,7 @@ export default function Index() {
                   onSubmitEditing={handleSubmit}
                   autoFocus
                   blurOnSubmit={false}
-                  style={{ position: 'absolute', top: 0, right: 0, opacity: 0 }}
+                  style={{ position: 'absolute', opacity: 0 }}
                 />
 
                 {scannedItems.length > 0 && (
@@ -232,10 +224,9 @@ export default function Index() {
                 <Text className='text-xl font-semibold '>Danh Sách Sản Phẩm</Text>
                 {ticketId && (
                   <TouchableOpacity onPress={() => {
-                    router.push({
-                      pathname: '/(screens)/detailscan',
-                      params: { detailScannedItems: scannedItems }
-                    });
+                    inputRef.current?.focus();
+                    useInventoryStore.getState().setScannedData(scannedItems);
+                    router.push('/(screens)/detailscan');
                   }}>
                     <MaterialIcons name="open-in-new" size={20} color="black" />
                   </TouchableOpacity>
@@ -252,7 +243,10 @@ export default function Index() {
                   keyExtractor={(item, index) => `${item.productId}-${index}`}
                   renderItem={({ item }) => (
                     < TouchableOpacity
-                      onPress={() => { sheetRef.current?.expand(); }}
+                      onPress={() => {
+                        setSelectedItem(item);
+                        sheetRef.current?.expand();
+                      }}
                       className="rounded-lg mx-4"
                       style={{ display: 'flex', padding: 10, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 1, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5 }}
                     >
@@ -301,16 +295,61 @@ export default function Index() {
 
             {selectedItem && (
               <View style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-around', marginVertical: '3%' }}>
                   <TouchableOpacity>
                     <Entypo name="minus" size={24} color="black" />
                   </TouchableOpacity>
-                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>18 Cái</Text>
-                  <TouchableOpacity>
+                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>{selectedItem.amountProductChecked} Cái</Text>
+                  <TouchableOpacity onPress={() => { selectedItem.amountProductChecked += 1; setSelectedItem({ ...selectedItem }) }}>
                     <Entypo name="plus" size={24} color="black" />
                   </TouchableOpacity>
                 </View>
+                <View style={{ width: '100%', paddingHorizontal: '3%', marginBottom: '5%', gap: 5 }}>
+                  <Text>Mã Sản Phẩm</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly value={selectedItem.productId} />
+                  <Text>Tên Sản Phẩm</Text>
+                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly value={selectedItem.productName} />
+                  <Text>Ghi Chú A</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TextInput
+                      style={{ flex: 1 }}
+                      className='rounded-md bg-gray-200 text-gray-500 pl-4'
+                      readOnly
+                      value={selectedItem.productDescriptionA} />
+                    {isEditA === false ? (
+                      <TouchableOpacity onPress={() => { setIsEditA(true) }}>
+                        <Feather name="edit" size={24} color="black" />
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity onPress={() => { setIsEditA(false) }}>
+                        <FontAwesome6 name="save" size={24} color="black" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  <Text>Ghi Chú B</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TextInput
+                      style={{ flex: 1 }}
+                      className='rounded-md bg-gray-200 text-gray-500 pl-4'
+                      editable={isEditB}
+                      value={editValue}
+                      onChangeText={setEditValue} />
+                    {isEditB === false ? (
+                      <TouchableOpacity onPress={() => {
+                        setIsEditB(true);
+                      }}>
+                        <Feather name="edit" size={24} color="black" />
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity onPress={() => {
+                        setIsEditB(false);
 
+                      }}>
+                        <FontAwesome6 name="save" size={24} color="black" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
               </View>
             )}
           </BottomSheetView>
