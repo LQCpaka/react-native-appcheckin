@@ -146,50 +146,50 @@ const Home = () => {
             borderBottomLeftRadius: 30,
           }}
         />
-        <View style={{
-          position: 'absolute',
-
-          width: '100%',
-          paddingHorizontal: 10,
-          top: 20,
-          alignItems: 'center',
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexDirection: 'row'
-        }}>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              color: '#aba4a4',
-            }}>
-            Lê Quốc Cần
-          </Text>
-
-          <Text
-            className='shadow-lg'
-            style={{
-              marginHorizontal: 5,
-              fontSize: 16,
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              color: '#aba4a4'
-            }}
-          >
-            Trạng thái:: Active
-          </Text>
-        </View>
+        {/* <View style={{ */}
+        {/*   position: 'absolute', */}
+        {/**/}
+        {/*   width: '100%', */}
+        {/*   paddingHorizontal: 10, */}
+        {/*   top: 20, */}
+        {/*   alignItems: 'center', */}
+        {/*   display: 'flex', */}
+        {/*   justifyContent: 'space-between', */}
+        {/*   flexDirection: 'row' */}
+        {/* }}> */}
+        {/*   <Text */}
+        {/*     style={{ */}
+        {/*       fontSize: 16, */}
+        {/*       fontWeight: 'bold', */}
+        {/*       textTransform: 'uppercase', */}
+        {/*       color: '#aba4a4', */}
+        {/*     }}> */}
+        {/*     Lê Quốc Cần */}
+        {/*   </Text> */}
+        {/**/}
+        {/*   <Text */}
+        {/*     className='shadow-lg' */}
+        {/*     style={{ */}
+        {/*       marginHorizontal: 5, */}
+        {/*       fontSize: 16, */}
+        {/*       fontWeight: 'bold', */}
+        {/*       textTransform: 'uppercase', */}
+        {/*       color: '#aba4a4' */}
+        {/*     }} */}
+        {/*   > */}
+        {/*     Trạng thái:: Active */}
+        {/*   </Text> */}
+        {/* </View> */}
 
 
         {/*===========================| PIE CHART |===========================*/}
-        <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-          <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+        <View style={{ alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 0 }}>
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
             <PieChart
               data={animatedData}
               width={screenWidth * 0.9} // Nhỏ hơn chiều rộng để dư khoảng trắng hai bên
               height={220}
-              center={[100, 0]} // Căn giữa theo chiều ngang
+              center={[85, 0]} // Căn giữa theo chiều ngang
               paddingLeft='0'
               chartConfig={{ color: () => `#000` }}
               accessor="population"
@@ -198,36 +198,37 @@ const Home = () => {
               hasLegend={false}
             />
           </View>
-        </View>
-        {/* Description dưới PieChart */}
-        <View style={{ alignItems: 'center', marginTop: 15 }}>
-          {[row1, row2].map((row, rowIndex) => (
-            <View key={rowIndex} style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 8 }}>
-              {row.map((item, index) => (
-                <View
-                  key={index}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginHorizontal: 10,
-                  }}
-                >
+          {/* Description dưới PieChart */}
+          <View style={{ alignItems: 'center', marginTop: 15 }}>
+            {[row1, row2].map((row, rowIndex) => (
+              <View key={rowIndex} style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 8 }}>
+                {row.map((item, index) => (
                   <View
+                    key={index}
                     style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: item.color,
-                      marginRight: 8,
-                      borderRadius: 2,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginHorizontal: 10,
                     }}
-                  />
-                  <Text style={{ fontSize: 14, color: '#333' }}>
-                    {item.name}: {item.population}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ))}
+                  >
+                    <View
+                      style={{
+                        width: 10,
+                        height: 10,
+                        backgroundColor: item.color,
+                        marginRight: 8,
+                        borderRadius: 2,
+                      }}
+                    />
+                    <Text style={{ fontSize: 14, color: '#333' }}>
+                      {item.name}: {item.population}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+
         </View>
 
 

@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useRef, useState, useEffect } from "react";
-import { useGlobalSearchParams } from "expo-router";
-
-import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData } from "react-native";
+import { router, useGlobalSearchParams } from "expo-router";
+import { create } from 'zustand';
+import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData, Image } from "react-native";
 import { Button, DataTable, Divider } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -13,6 +13,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { images } from "@/constant/images";
 //====================| DATA FETCHING |==========================
 
 interface InventoryItem {
@@ -40,12 +41,14 @@ export default function Index() {
   }, []);
 
   const [scanInput, setScanInput] = useState('');
-  const [scannedCodes, setScannedCodes] = useState<string[]>([]);
+  // const [scannedCodes, setScannedCodes] = useState<string[]>([]);
+  const [scannedItems, setScannedItems] = useState<InventoryItem[]>([]);
+  const displayedItems = scannedItems.slice(0, 5);
 
   const handleScan = (text: string) => {
     if (text.endsWith('\n')) {
       const clean = text.trim();
-      setScannedCodes(prev => [...prev, clean]);
+      setScannedItems(prev => [...prev, clean]);
       setScanInput('');
     } else {
       setScanInput(text);
@@ -54,10 +57,32 @@ export default function Index() {
 
   const handleSubmit = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
     const scanned = e.nativeEvent.text.trim();
-    if (scanned.length > 0) {
-      setScannedCodes(prev => [...prev, scanned]);
-      setScanInput(''); // reset input
+    if (!scanned) return;
+
+    const existedIndex = scannedItems.findIndex(item => item.productId === scanned);
+
+    if (existedIndex !== -1) {
+      const updatedItems = [...scannedItems];
+      updatedItems[existedIndex].amountProductChecked += 1;
+
+      const reOrdered = [
+        updatedItems[existedIndex],
+        ...updatedItems.filter((_, i) => i !== existedIndex)
+      ];
+
+      setScannedItems(reOrdered);
+    } else {
+      const data = inventoryData.find(item => item.productId === scanned);
+      if (!data) {
+        alert("Không tìm thấy sản phẩm!");
+        return;
+      }
+
+      const newItem = { ...data, amountProductChecked: 1 };
+      setScannedItems(prev => [newItem, ...prev]);
     }
+
+    setScanInput('');
   };
 
 
@@ -137,120 +162,161 @@ export default function Index() {
 
   const { ticketId, ticketType } = useGlobalSearchParams();
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView className='flex-1'>
+    <SafeAreaView className='flex-1'>
+      <GestureHandlerRootView style={{ flex: 1 }}>
 
         {/*===============================| HEADER  |============================================*/}
         <View className='flex items-center justify-center h-12 bg-white shadow mb-4'>
           <Text className='text-lg uppercase font-semibold'>Quét Mã</Text>
         </View>
-
-        {/*===============================| SCAN DATA SECTION  |============================================*/}
-        <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
-          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: 4 }}>
-            <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
-              <MaterialCommunityIcons name="qrcode-scan" size={20} color="#aba4a4" />
-              <Text className="font-semibold" style={{ marginLeft: 10, color: '#aba4a4' }}>{!ticketId ? 'Vui Lòng Chọn Phiếu' : ticketId}</Text>
-            </View>
-            <Ionicons name="reload-sharp" size={20} color="#aba4a4" style={{ marginTop: 10, }} />
-          </View>
-          <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginTop: '3%' }} />
-          <View style={{ marginVertical: '3%', marginHorizontal: 15 }}>
-            <View className='flex gap-2'>
-              <TextInput
-                value={scanInput}
-                onChangeText={setScanInput}
-                onSubmitEditing={handleSubmit}
-                autoFocus
-                blurOnSubmit={false}
-                style={{ position: 'absolute', top: 0, right: -100, }}
-              />
-
-              {ticketType === 'HaveInput' ? (
-                <>
-                  <Text className='ml-2 font-semibold'>Mã Sản Phẩm</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>12837192837</TextInput>
-                  <Text className='ml-2 font-semibold'>Tên Sản Phẩm</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>Thịt gà</TextInput>
-                </>
-              ) : (
-                <>
-                  <Text className='ml-2 font-semibold'>Mã Sản Phẩm</Text>
-                  <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly>12837192837</TextInput>
-                </>
-              )}
-            </View>
-            <View style={{ display: 'flex', gap: 5, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }} textColor='#fff'>Hủy Phiếu Kiểm</Button>
-              <Button
-                style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }}
-                textColor='#fff' className='rounded-md'
-              >
-                Cập Nhật
-              </Button>
-            </View>
-          </View>
-        </View>
-
-
-        {/*===============================| DATA LOAD SECTION |===============================*/}
-        <View>
-          <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
-
-            {/* HEADER LOADSECTION */}
-            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: '4%' }}>
-              <Text className='text-xl font-semibold '>Danh Sách Sản Phẩm</Text>
-              {ticketId && (
-                <TouchableOpacity>
-                  <MaterialIcons name="open-in-new" size={20} color="black" />
-                </TouchableOpacity>
-
-              )}
-            </View>
-
-            <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginBottom: '3%' }} />
-            {/* PRODUCT ITEM */}
-            <View style={{ backgroundColor: '#fff', height: '68%' }}>
-
-              {/* PRODUCT ITEM */}
-              <TouchableOpacity
-                className="rounded-lg mx-4"
-                style={{ display: 'flex', padding: 10, flexDirection: 'row', justifyContent: 'space-between', shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 1, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5 }}
-              >
-                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', }}>
-                  <Entypo name="box" size={40} color="#aba4a4" className="mr-4" />
-                  <View>
-                    <Text style={{ fontSize: 16, fontWeight: 'semibold' }} >Tên Sản Phẩm</Text>
-                    <Text style={{ fontSize: 16, fontWeight: 'semibold', color: '#787474' }} >01231283</Text>
-                  </View>
-                </View>
-
-                {/* AMOUNT PRODUCT  */}
-                <View style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                  <Text style={{ color: '#787474' }} >Số lượng</Text>
-                  <Text style={{ fontSize: 25, fontWeight: 'bold' }}>1</Text>
-                </View>
+        <ScrollView contentContainerStyle={{ paddingBottom: 50 }} style={{ paddingTop: '2%' }} >
+          {/*===============================| SCAN DATA SECTION  |============================================*/}
+          <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%' }}>
+            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: 4 }}>
+              <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
+                <MaterialCommunityIcons name="qrcode-scan" size={20} color="#aba4a4" />
+                <Text className="font-semibold" style={{ marginLeft: 10, color: '#aba4a4' }}>{!ticketId ? 'Vui Lòng Chọn Phiếu' : ticketId}</Text>
+              </View>
+              <TouchableOpacity onPress={() => {
+                inputRef.current?.focus();
+                inputRef.current?.setNativeProps({ text: '' });
+              }}>
+                <Ionicons name="reload-sharp" size={20} color="#aba4a4" style={{ marginTop: 10, }} />
               </TouchableOpacity>
+            </View>
+            <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginTop: '3%' }} />
+            <View style={{ marginVertical: '3%', marginHorizontal: 15 }}>
+              <View className='flex gap-2'>
+                <TextInput
+                  ref={inputRef}
+                  showSoftInputOnFocus={false}
+                  value={scanInput}
+                  onChangeText={setScanInput}
+                  onSubmitEditing={handleSubmit}
+                  autoFocus
+                  blurOnSubmit={false}
+                  style={{ position: 'absolute', top: 0, right: 0, opacity: 0 }}
+                />
 
-              <FlatList
-                data={scannedCodes}
-                style={{ display: "none" }}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <View style={{ padding: 10, borderBottomWidth: 1, borderColor: '#ddd' }}>
-                    <Text>{item}</Text>
-                  </View>
+                {scannedItems.length > 0 && (
+                  <>
+                    <Text className='ml-2 font-semibold'>Mã Sản Phẩm</Text>
+                    <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly value={scannedItems[0].productId} />
+                    <Text className='ml-2 font-semibold'>Tên Sản Phẩm</Text>
+                    <TextInput className='rounded-md bg-gray-200 text-gray-500 pl-4' readOnly value={scannedItems[0].productName} />
+                  </>
                 )}
-                ListEmptyComponent={
-                  <Text style={{ textAlign: 'center', marginTop: 20 }}>Chưa có mã nào được quét</Text>
-                }
-              />
+
+
+
+              </View>
+              <View style={{ display: 'flex', gap: 5, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Button style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }} textColor='#fff'>Hủy Phiếu Kiểm</Button>
+                <Button
+                  style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }}
+                  textColor='#fff' className='rounded-md'
+                >
+                  Cập Nhật
+                </Button>
+              </View>
+            </View>
+          </View>
+
+
+          {/*===============================| DATA LOAD SECTION |===============================*/}
+          <View>
+            <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
+
+              {/* HEADER LOADSECTION */}
+              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: '4%' }}>
+                <Text className='text-xl font-semibold '>Danh Sách Sản Phẩm</Text>
+                {ticketId && (
+                  <TouchableOpacity onPress={() => {
+                    router.push({
+                      pathname: '/(screens)/detailscan',
+                      params: { detailScannedItems: scannedItems }
+                    });
+                  }}>
+                    <MaterialIcons name="open-in-new" size={20} color="black" />
+                  </TouchableOpacity>
+
+                )}
+              </View>
+
+              <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginBottom: '3%' }} />
+              {/* PRODUCT ITEM */}
+              <View style={{ backgroundColor: '#fff' }}>
+                <FlatList
+                  data={displayedItems}
+                  scrollEnabled={false}
+                  keyExtractor={(item, index) => `${item.productId}-${index}`}
+                  renderItem={({ item }) => (
+                    < TouchableOpacity
+                      onPress={() => { sheetRef.current?.expand(); }}
+                      className="rounded-lg mx-4"
+                      style={{ display: 'flex', padding: 10, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 1, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5 }}
+                    >
+                      <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', }}>
+                        <Entypo name="box" size={40} color="#aba4a4" className="mr-4" />
+                        <View>
+                          <Text style={{ fontSize: 16, fontWeight: 'semibold' }} >{item.productName}</Text>
+                          <Text style={{ fontSize: 16, fontWeight: 'semibold', color: '#787474' }} >{item.productId}</Text>
+                        </View>
+                      </View>
+
+
+                      <View style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ color: '#787474' }} >Số lượng</Text>
+                        <Text style={{ fontSize: 25, fontWeight: 'bold' }}>{item.amountProductChecked}</Text>
+                      </View>
+                    </TouchableOpacity>
+
+
+                  )}
+                  ListEmptyComponent={(
+                    <View style={{ height: '75%', marginTop: 10 }} className=" items-center justify-center">
+                      <Image
+                        source={images.nodatafound}
+                        style={{ width: 200, height: 200 }} />
+                    </View>
+                  )}
+                />
+              </View>
+
 
             </View>
           </View>
-        </View>
-      </SafeAreaView>
-    </GestureHandlerRootView >
+          {/* <View style={{ marginHorizontal: '4%' }}></View> */}
+        </ScrollView>
+        <BottomSheet
+          ref={sheetRef}
+          enablePanDownToClose
+          snapPoints={snapPoint}
+          index={-1}
+          onClose={() => {
+            setSelectedItem(null);
+          }}
+        >
+          <BottomSheetView>
+
+            {selectedItem && (
+              <View style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <TouchableOpacity>
+                    <Entypo name="minus" size={24} color="black" />
+                  </TouchableOpacity>
+                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>18 Cái</Text>
+                  <TouchableOpacity>
+                    <Entypo name="plus" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
+
+              </View>
+            )}
+          </BottomSheetView>
+        </BottomSheet>
+      </GestureHandlerRootView >
+    </SafeAreaView >
 
   );
 }
