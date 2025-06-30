@@ -129,6 +129,9 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, [chartData]);
 
+  const row1 = animatedData.slice(0, 2);
+  const row2 = animatedData.slice(2, 4);
+
   return (
     <SafeAreaView className='flex-1'>
       <View className='flex items-center justify-center shadow-md'
@@ -145,6 +148,7 @@ const Home = () => {
         />
         <View style={{
           position: 'absolute',
+
           width: '100%',
           paddingHorizontal: 10,
           top: 20,
@@ -173,23 +177,65 @@ const Home = () => {
               color: '#aba4a4'
             }}
           >
-            Trạng thái: Active
+            Trạng thái:: Active
           </Text>
         </View>
 
 
         {/*===========================| PIE CHART |===========================*/}
-        <PieChart
+        <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+          <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+            <PieChart
+              data={animatedData}
+              width={screenWidth * 0.9} // Nhỏ hơn chiều rộng để dư khoảng trắng hai bên
+              height={220}
+              center={[100, 0]} // Căn giữa theo chiều ngang
+              paddingLeft='0'
+              chartConfig={{ color: () => `#000` }}
+              accessor="population"
+              backgroundColor="transparent"
+              absolute
+              hasLegend={false}
+            />
+          </View>
+        </View>
+        {/* Description dưới PieChart */}
+        <View style={{ alignItems: 'center', marginTop: 15 }}>
+          {[row1, row2].map((row, rowIndex) => (
+            <View key={rowIndex} style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 8 }}>
+              {row.map((item, index) => (
+                <View
+                  key={index}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginHorizontal: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: item.color,
+                      marginRight: 8,
+                      borderRadius: 2,
+                    }}
+                  />
+                  <Text style={{ fontSize: 14, color: '#333' }}>
+                    {item.name}: {item.population}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ))}
+        </View>
 
-          data={animatedData}
-          width={screenWidth}
-          height={220}
-          chartConfig={{ color: () => `#000` }}
-          accessor="population"
-          backgroundColor="transparent"
-          paddingLeft="15"
-          absolute
-        />
+
+
+
+
+
+
       </View>
       <FlatList
         data={items}
@@ -210,7 +256,7 @@ const Home = () => {
                 size={40}
               />
               {item.label === 'PHIẾU KIỂM' && ticket.length > 0 && (
-                <View className="absolute top-[-5] right-2 bg-red-500 rounded-full w-5 h-5 justify-center items-center">
+                <View className="absolute top-[-5] right-0 bg-red-500 rounded-full w-5 h-5 justify-center items-center">
                   <Text className="text-white text-xs font-bold">{ticket.length}</Text>
                 </View>
               )}

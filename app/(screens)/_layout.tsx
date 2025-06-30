@@ -8,6 +8,10 @@ const _layout = () => {
         name="detailinventory"
         options={{ title: 'Kho Hàng' }}
       />
+      <Stack.Screen
+        name="detailscan"
+        options={{ title: 'Chi tiết quét kiểm kê' }}
+      />
     </Stack >
   )
 }

@@ -12,6 +12,7 @@ import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 //====================| DATA FETCHING |==========================
 
 interface InventoryItem {
@@ -138,11 +139,13 @@ export default function Index() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView className='flex-1'>
+
+        {/*===============================| HEADER  |============================================*/}
         <View className='flex items-center justify-center h-12 bg-white shadow mb-4'>
           <Text className='text-lg uppercase font-semibold'>Quét Mã</Text>
         </View>
 
-        {/* SCAN DATA SECTION  */}
+        {/*===============================| SCAN DATA SECTION  |============================================*/}
         <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
           <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: 4 }}>
             <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
@@ -190,12 +193,23 @@ export default function Index() {
         </View>
 
 
-        {/* DATA LOAD SECTION */}
+        {/*===============================| DATA LOAD SECTION |===============================*/}
         <View>
           <View className="rounded-md" style={{ shadowColor: '#000', backgroundColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.20, shadowRadius: 3.84, elevation: 5, marginHorizontal: '4%', marginTop: '5%' }}>
-            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginHorizontal: '4%', padding: '4%' }}>
+
+            {/* HEADER LOADSECTION */}
+            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: '4%', padding: '4%' }}>
               <Text className='text-xl font-semibold '>Danh Sách Sản Phẩm</Text>
+              {ticketId && (
+                <TouchableOpacity>
+                  <MaterialIcons name="open-in-new" size={20} color="black" />
+                </TouchableOpacity>
+
+              )}
             </View>
+
+            <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginBottom: '3%' }} />
+            {/* PRODUCT ITEM */}
             <View style={{ backgroundColor: '#fff', height: '68%' }}>
 
               {/* PRODUCT ITEM */}
@@ -236,7 +250,6 @@ export default function Index() {
           </View>
         </View>
       </SafeAreaView>
-
     </GestureHandlerRootView >
 
   );
