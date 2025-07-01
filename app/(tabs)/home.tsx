@@ -146,40 +146,6 @@ const Home = () => {
             borderBottomLeftRadius: 30,
           }}
         />
-        {/* <View style={{ */}
-        {/*   position: 'absolute', */}
-        {/**/}
-        {/*   width: '100%', */}
-        {/*   paddingHorizontal: 10, */}
-        {/*   top: 20, */}
-        {/*   alignItems: 'center', */}
-        {/*   display: 'flex', */}
-        {/*   justifyContent: 'space-between', */}
-        {/*   flexDirection: 'row' */}
-        {/* }}> */}
-        {/*   <Text */}
-        {/*     style={{ */}
-        {/*       fontSize: 16, */}
-        {/*       fontWeight: 'bold', */}
-        {/*       textTransform: 'uppercase', */}
-        {/*       color: '#aba4a4', */}
-        {/*     }}> */}
-        {/*     Lê Quốc Cần */}
-        {/*   </Text> */}
-        {/**/}
-        {/*   <Text */}
-        {/*     className='shadow-lg' */}
-        {/*     style={{ */}
-        {/*       marginHorizontal: 5, */}
-        {/*       fontSize: 16, */}
-        {/*       fontWeight: 'bold', */}
-        {/*       textTransform: 'uppercase', */}
-        {/*       color: '#aba4a4' */}
-        {/*     }} */}
-        {/*   > */}
-        {/*     Trạng thái:: Active */}
-        {/*   </Text> */}
-        {/* </View> */}
 
 
         {/*===========================| PIE CHART |===========================*/}

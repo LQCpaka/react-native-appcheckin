@@ -11,6 +11,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from 'expo-router';
 
+import { useInventoryStore } from '@/libs/useInventoryStore';
+
+
 const statusIcon = [
   {
     status: 'Phiếu Mới',
@@ -105,6 +108,16 @@ const Inventory = () => {
       .catch(error => console.error('Error fetching inventory:', error));
   }, []);
 
+
+
+  const { resetScannedData, setTicket } = useInventoryStore();
+
+  const handleSelectTicket = (ticketId: string, type: 'HaveInput' | 'NoInput') => {
+    resetScannedData();                // 🧼 Reset dữ liệu cũ
+    setTicket(ticketId, type);         // ✅ Ghi nhớ ticket hiện tại
+
+    router.push('/(tabs)/scan');       // 👉 Không cần truyền param nếu đã có trong store
+  };
   return (
     <PaperProvider>
       <SafeAreaView >
@@ -208,13 +221,7 @@ const Inventory = () => {
                       <>
                         <Button
                           onPress={() => {
-                            router.push({
-                              pathname: '/(tabs)/scan',
-                              params: {
-                                ticketId: selectedItem.ticketId,
-                                ticketType: selectedItem.ticketType,
-                              },
-                            });
+                            handleSelectTicket(selectedItem.ticketId, selectedItem.ticketType)
                             hideModal();
                           }}
                           style={{ backgroundColor: '#1F8EF1', width: '50%', borderRadius: 8 }}
