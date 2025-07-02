@@ -19,6 +19,7 @@ import { images } from "@/constant/images";
 
 import { useInventoryStore } from '@/libs/useInventoryStore';
 import { getCheckedCount } from '@/utils/getCheckedCount';
+import EditItemSheet from "./EditItemSheet";
 
 type InventoryType = 'HaveInput' | 'NoInput';
 
@@ -170,7 +171,23 @@ const ScanArea = () => {
   const topScannedItems = useMemo(() => scannedData.slice(0, 5), [scannedData]);
 
 
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
+  const handleUpdateItem = (updated: InventoryItem) => {
+    const updatedList = scannedData.map(i =>
+      i.productId === updated.productId ? updated : i
+    );
+    setScannedData(updatedList);
+    setSelectedItem(updated); // để giữ sheet mở nếu bạn thích
+  };
+
+  // ==============================| RESET DATA |=====================================
+  const { resetScannedData, setTicket } = useInventoryStore();
+  const handleSelectTicket = () => {
+    resetScannedData();
+    setTicket('', 'HaveInput')
+
+  }
   return (
     <>
       <ScrollView contentContainerStyle={{ paddingBottom: 50 }} style={{ paddingTop: '2%' }} >
@@ -215,7 +232,12 @@ const ScanArea = () => {
 
             </View>
             <View style={{ display: 'flex', gap: 5, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }} textColor='#fff'>Hủy Phiếu Kiểm</Button>
+              <Button
+                onPress={() => {
+                  handleSelectTicket();
+                }}
+                style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }}
+                textColor='#fff'>Hủy Phiếu Kiểm</Button>
               <Button
                 style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }}
                 textColor='#fff' className='rounded-md'
@@ -253,6 +275,7 @@ const ScanArea = () => {
                 keyExtractor={(item, index) => `${item.productId}-${index}`}
                 renderItem={({ item }) => (
                   <TouchableOpacity
+                    onPress={() => setSelectedItem(item)}
                     style={{
                       padding: 10,
                       marginHorizontal: 16,
@@ -298,6 +321,14 @@ const ScanArea = () => {
         </View>
         {/* <View style={{ marginHorizontal: '4%' }}></View> */}
       </ScrollView>
+
+      {selectedItem && (
+        <EditItemSheet
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onUpdate={handleUpdateItem}
+        />
+      )}
     </>
   )
 }

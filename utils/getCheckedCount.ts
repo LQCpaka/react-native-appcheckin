@@ -1,4 +1,3 @@
-// utils/getCheckedCount.ts
 
 import { InventoryItem, InventoryNoInput } from '@/types/Inventory';
 

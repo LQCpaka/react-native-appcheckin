@@ -9,15 +9,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import Entypo from '@expo/vector-icons/Entypo';
-import Ionicons from "@expo/vector-icons/Ionicons";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Feather from '@expo/vector-icons/Feather';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { images } from "@/constant/images";
-
-import { useInventoryStore } from '@/libs/useInventoryStore';
 import ScanArea from "@/components/ScanArea";
 //====================| DATA FETCHING |==========================
 
@@ -38,16 +29,12 @@ export default function Index() {
 
 
   // =================| BOTTOM SHEET DATA |===========================
-  const sheetRef = useRef<BottomSheetMethods>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const snapPoint = ['50%'];
-
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const [isEditA, setIsEditA] = useState(false);
-  const [isEditB, setIsEditB] = useState(false);
-
-  const [editValue, setEditValue] = useState(selectedItem?.productDescriptionB || '');
+  // const sheetRef = useRef<BottomSheetMethods>(null);
+  // const [isOpen, setIsOpen] = useState(false);
+  // const snapPoint = ['50%'];
+  //
+  // const [selectedItem, setSelectedItem] = useState(null);
+  //
 
   return (
     <SafeAreaView className='flex-1'>
