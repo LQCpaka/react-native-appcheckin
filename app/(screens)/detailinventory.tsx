@@ -47,24 +47,42 @@ const Detailinventory = () => {
   // ======================| DATA TABLE - FETCHING |=======================
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
 
-  const { ticketId } = useGlobalSearchParams()
+  const { ticketId, ticketType } = useGlobalSearchParams()
 
   const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
   useEffect(() => {
-    axios.get(
-      `${API_URL}/inventory/${ticketId}`,
-      { headers: { Accept: 'application/json' } })
+    if (ticketType === 'HaveInput') {
+      axios.get(
+        `${API_URL}/inventory/${ticketId}`,
+        { headers: { Accept: 'application/json' } })
 
-      .then(response => {
-        console.log('API response:', response.data);
-        if (Array.isArray(response.data)) {
-          setInventoryData(response.data);
-        } else {
-          console.error('Error: API did not return an array', response.data);
-          setInventoryData([]);
-        }
-      })
-      .catch(error => console.error('Error fetching inventory:', error));
+        .then(response => {
+          console.log('API response:', response.data);
+          if (Array.isArray(response.data)) {
+            setInventoryData(response.data);
+          } else {
+            console.error('Error: API did not return an array', response.data);
+            setInventoryData([]);
+          }
+        })
+        .catch(error => console.error('Error fetching inventory:', error));
+    } else if (ticketType === 'NoInput') {
+      axios.get(
+        `${API_URL}/no-input/${ticketId}`,
+        { headers: { Accept: 'application/json' } })
+
+        .then(response => {
+          console.log('API response:', response.data);
+          if (Array.isArray(response.data)) {
+            setInventoryData(response.data);
+          } else {
+            console.error('Error: API did not return an array', response.data);
+            setInventoryData([]);
+          }
+        })
+        .catch(error => console.error('Error fetching inventory:', error));
+    }
+
   }, []);
 
   // =================| BOTTOM SHEET DATA |===========================
@@ -140,26 +158,37 @@ const Detailinventory = () => {
                     <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Tên Sản Phẩm</DataTable.Cell>
                     <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productName}</DataTable.Cell>
                   </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Số Lượng</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProduct} {selectedItem.countAs}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Đã Kiểm Kê</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProductChecked}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Giá Sản Phẩm</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productPrice} VND</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Chính</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionA ? selectedItem.productDescriptionA : "Không Có"}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Phụ</DataTable.Cell>
-                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionB ? selectedItem.productDescriptionB : "Không Có"}</DataTable.Cell>
-                  </DataTable.Row>
+                  {ticketType === 'HaveInput' ? (
+                    <>
+                      <DataTable.Row>
+                        <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Số Lượng</DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProduct} {selectedItem.countAs}</DataTable.Cell>
+                      </DataTable.Row>
+                      <DataTable.Row>
+                        <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Đã Kiểm Kê</DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProductChecked}</DataTable.Cell>
+                      </DataTable.Row>
+                      <DataTable.Row>
+                        <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Giá Sản Phẩm</DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productPrice} VND</DataTable.Cell>
+                      </DataTable.Row>
+                      <DataTable.Row>
+                        <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Chính</DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionA ? selectedItem.productDescriptionA : "Không Có"}</DataTable.Cell>
+                      </DataTable.Row>
+                      <DataTable.Row>
+                        <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Ghi Chú Phụ</DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.productDescriptionB ? selectedItem.productDescriptionB : "Không Có"}</DataTable.Cell>
+                      </DataTable.Row>
+                    </>
+                  ) : (
+                    <DataTable.Row>
+                      <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "Black" }}>Đã Kiểm Kê</DataTable.Cell>
+                      <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{selectedItem.amountProduct}</DataTable.Cell>
+                    </DataTable.Row>
+
+                  )}
+
                 </DataTable>
 
               </View>

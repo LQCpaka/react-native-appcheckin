@@ -113,11 +113,15 @@ const Inventory = () => {
   const { resetScannedData, setTicket } = useInventoryStore();
 
   const handleSelectTicket = (ticketId: string, type: 'HaveInput' | 'NoInput') => {
-    resetScannedData();                // 🧼 Reset dữ liệu cũ
-    setTicket(ticketId, type);         // ✅ Ghi nhớ ticket hiện tại
 
-    router.push('/(tabs)/scan');       // 👉 Không cần truyền param nếu đã có trong store
+    resetScannedData();       // clear data
+    setTicket(ticketId, type); // lưu phiếu mới
+
+    setTimeout(() => {
+      router.push('/(tabs)/scan'); // push sau 1 tick event loop
+    }, 0);
   };
+
   return (
     <PaperProvider>
       <SafeAreaView >
@@ -146,7 +150,7 @@ const Inventory = () => {
 
 
         <FlatList
-          style={{ height: '80%', marginBottom: 20 }}
+          style={{ height: '70%', marginBottom: 20 }}
           data={filteredData}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => {
@@ -232,7 +236,7 @@ const Inventory = () => {
                           onPress={() => {
                             router.push({
                               pathname: '/(screens)/detailinventory',
-                              params: { ticketId: selectedItem.ticketId },
+                              params: { ticketId: selectedItem.ticketId, ticketType: selectedItem.ticketType },
                             });
                             hideModal();
                           }}

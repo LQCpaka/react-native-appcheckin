@@ -8,7 +8,6 @@ type StoreState = {
   setScannedData: (data: ScannedInventoryType[]) => void;
   resetScannedData: () => void;
 
-  // ✨ Thêm phần ticket vào đây
   ticketId: string;
   ticketType: InventoryType;
   setTicket: (id: string, type: InventoryType) => void;

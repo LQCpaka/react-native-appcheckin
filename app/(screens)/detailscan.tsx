@@ -61,6 +61,7 @@ const DetailsScanScreen = () => {
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onUpdate={handleUpdateItem}
+          paddingSheet='15%'
         />
       )}
 

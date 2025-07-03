@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { router, useFocusEffect, useGlobalSearchParams } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
 
 import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData, Image, Alert } from "react-native";
 import { Button, DataTable, Divider } from "react-native-paper";
@@ -20,6 +21,9 @@ import { images } from "@/constant/images";
 import { useInventoryStore } from '@/libs/useInventoryStore';
 import { getCheckedCount } from '@/utils/getCheckedCount';
 import EditItemSheet from "./EditItemSheet";
+import ModalConfirmDelete from "./ModalConfirmDelete";
+import ModalConfirmUpdate from "./ModalConfirmUpdate";
+
 
 type InventoryType = 'HaveInput' | 'NoInput';
 
@@ -58,6 +62,7 @@ const ScanArea = () => {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
 
+  const { userInfo, signOut } = useAuth();
   useFocusEffect(
     useCallback(() => {
       const timeout = setTimeout(() => {
@@ -69,33 +74,36 @@ const ScanArea = () => {
 
   //=================================| FETCH INVENTORY DATA |===================================
 
-  useEffect(() => {
+  const fetchInventory = async () => {
     if (!ticketId || !ticketType) return;
 
-    setInventoryData([]);
+    try {
+      const endpoint =
+        ticketType === "HaveInput"
+          ? `${API_URL}/inventory/${ticketId}`
+          : `${API_URL}/no-input/${ticketId}`;
 
-    const fetchData = async () => {
-      try {
-        const endpoint =
-          ticketType === "HaveInput"
-            ? `${API_URL}/inventory/${ticketId}`
-            : `${API_URL}/no-input/${ticketId}`;
+      const response = await axios.get(endpoint, {
+        headers: { Accept: 'application/json' },
+      });
 
-        const response = await axios.get(endpoint, {
-          headers: { Accept: 'application/json' },
-        });
-
-        if (Array.isArray(response.data)) {
-          setInventoryData(response.data);
-        } else {
-          setInventoryData([]);
-        }
-      } catch (error) {
-        console.error("Error fetching inventory data:", error);
+      if (Array.isArray(response.data)) {
+        setInventoryData(response.data);
+      } else {
+        setInventoryData([]);
       }
-    };
-    fetchData();
-  }, [ticketId, ticketType]);
+    } catch (error) {
+      console.error("Error fetching inventory data:", error);
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      setInventoryData([]); // 👈 Optional: clear trước khi fetch
+      fetchInventory();     // 👈 Tự fetch lại mỗi lần vào screen
+      return () => { };      // cleanup nếu cần
+    }, [ticketId, ticketType])
+  );
+
 
   //=================================| HANDLE SUBMIT DATA |===================================
 
@@ -117,7 +125,22 @@ const ScanArea = () => {
       } else {
         const match = inventoryData.find(item => item.productId === scanned);
         if (!match) {
-          Alert.alert("Không tìm thấy sản phẩm!");
+          Alert.alert(
+            "Không tìm thấy sản phẩm!",
+            "",
+            [
+              {
+                text: "OK",
+                onPress: () => {
+                  //reset pointer
+                  inputRef.current?.focus();
+                  inputRef.current?.setNativeProps({ text: '' });
+                }
+              }
+            ],
+            { cancelable: false }
+          );
+
           return;
         }
 
@@ -135,7 +158,7 @@ const ScanArea = () => {
         updatedList[existedIndex].amountProduct += 1;
 
         updatedList[existedIndex].scannedData.push({
-          scannedBy: 'admin',
+          scannedBy: userInfo?.name || 'Unknown',
           scannedAt: new Date(),
         });
 
@@ -152,7 +175,7 @@ const ScanArea = () => {
           productName: '',
           amountProduct: 1,
           scannedData: [
-            { scannedBy: 'admin', scannedAt: new Date() }
+            { scannedBy: userInfo?.name || 'Unknown', scannedAt: new Date() }
           ],
           totalScanned: 1,
           type: 'NoInput',
@@ -167,27 +190,94 @@ const ScanArea = () => {
   };
 
 
+  const sendDataToServer = async () => {
+    try {
+      if (!ticketId || scannedData.length === 0) return;
+
+      if (ticketType === 'HaveInput') {
+        const payload = {
+          ticketId,
+          scannedData: scannedData.map(item => ({
+            productId: item.productId,
+            checkedBy: userInfo?.name || 'Unknown',
+            amountProductChecked: item.amountProductChecked,
+            productDescriptionA: item.productDescriptionA,
+            productDescriptionB: item.productDescriptionB
+          }))
+        };
+
+        await axios.put(`${API_URL}/inventory/update`, payload);
+      }
+
+      if (ticketType === 'NoInput') {
+        const payload = {
+          ticketId,
+          scannedData: scannedData.map(item => ({
+            productId: item.productId,
+            scannedBy: userInfo?.name || 'Unknown',
+            scanCount: item.amountProduct,
+          }))
+        };
+
+        await axios.post(`${API_URL}/no-input/update`, payload);
+      }
+
+      Alert.alert('✔️ Thành công', 'Dữ liệu đã được cập nhật lên hệ thống!');
+    } catch (error) {
+      console.error('Lỗi khi gửi dữ liệu:', error);
+      Alert.alert('❌ Lỗi', 'Không thể gửi dữ liệu lên server');
+    }
+  };
+
 
   const topScannedItems = useMemo(() => scannedData.slice(0, 5), [scannedData]);
 
 
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
-  const handleUpdateItem = (updated: InventoryItem) => {
+  const handleUpdateItem = (updated: InventoryItem & { __delete?: boolean }) => {
+    if (updated.__delete) {
+      const filteredList = scannedData.filter(i => i.productId !== updated.productId);
+      setScannedData(filteredList);
+      setSelectedItem(null); // 👈 đóng sheet luôn nếu cần
+      return;
+    }
+
     const updatedList = scannedData.map(i =>
       i.productId === updated.productId ? updated : i
     );
     setScannedData(updatedList);
-    setSelectedItem(updated); // để giữ sheet mở nếu bạn thích
+    setSelectedItem(updated);
   };
 
-  // ==============================| RESET DATA |=====================================
-  const { resetScannedData, setTicket } = useInventoryStore();
-  const handleSelectTicket = () => {
-    resetScannedData();
-    setTicket('', 'HaveInput')
 
-  }
+  // ==============================| POPUP RESET DATA|=====================================
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  const showConfirmModal = () => setConfirmVisible(true);
+  const hideConfirmModal = () => setConfirmVisible(false);
+
+  const { resetScannedData, setTicket } = useInventoryStore();
+
+  const handleConfirmReset = () => {
+    resetScannedData();         // 🧼 Reset dữ liệu
+    setTicket('', 'HaveInput'); // 🧨 Hủy phiếu hiện tại
+    hideConfirmModal();         // Đóng modal
+  };
+
+  // ==============================| POPUP UPDATE DATA |=====================================
+
+  const [confirmVisibleUpdate, setConfirmVisibleUpdate] = useState(false);
+
+  const showConfirmModalUpdate = () => setConfirmVisibleUpdate(true);
+  const hideConfirmModalUpdate = () => setConfirmVisibleUpdate(false);
+
+
+  const handleConfirmUpdate = () => {
+    sendDataToServer()
+    hideConfirmModalUpdate();         // Đóng modal
+  };
+
   return (
     <>
       <ScrollView contentContainerStyle={{ paddingBottom: 50 }} style={{ paddingTop: '2%' }} >
@@ -216,7 +306,7 @@ const ScanArea = () => {
                 onSubmitEditing={handleSubmit}
                 autoFocus
                 blurOnSubmit={false}
-              // style={{ position: 'absolute', opacity: 0 }}
+                style={{ position: 'absolute', opacity: 0 }}
               />
 
               {scannedData.length > 0 && (
@@ -234,11 +324,13 @@ const ScanArea = () => {
             <View style={{ display: 'flex', gap: 5, marginTop: '5%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Button
                 onPress={() => {
-                  handleSelectTicket();
+                  showConfirmModal()
+                  // handleReset();
                 }}
                 style={{ backgroundColor: '#ee2400', width: '50%', borderRadius: 8 }}
                 textColor='#fff'>Hủy Phiếu Kiểm</Button>
               <Button
+                onPress={() => { showConfirmModalUpdate() }}
                 style={{ backgroundColor: '#FF6B00', width: '50%', borderRadius: 8 }}
                 textColor='#fff' className='rounded-md'
               >
@@ -327,8 +419,22 @@ const ScanArea = () => {
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onUpdate={handleUpdateItem}
+          paddingSheet="5%"
         />
       )}
+
+      <ModalConfirmDelete
+        visible={confirmVisible}
+        onConfirm={handleConfirmReset}
+        onCancel={hideConfirmModal}
+      />
+
+      <ModalConfirmUpdate
+        visible={confirmVisibleUpdate}
+        onConfirm={handleConfirmUpdate}
+        onCancel={hideConfirmModalUpdate}
+      />
+
     </>
   )
 }
