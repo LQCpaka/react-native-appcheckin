@@ -10,7 +10,7 @@ export interface InventoryItem {
   productPrice?: string;
   productDescriptionA?: string;
   productDescriptionB?: string;
-  type?: 'HaveInput'; // optional để dễ phân loại
+  type?: 'HaveInput';
 }
 
 export interface InventoryNoInput {
@@ -23,10 +23,9 @@ export interface InventoryNoInput {
     scannedAt: Date;
     scannedByName?: string;
   }[];
-  totalScanned?: number; // có thể được cập nhật sau từ scannedData.length
+  totalScanned?: number;
   type?: 'NoInput';
 }
 
-// Optional: Gộp thành 1 kiểu dùng chung
 export type ScannedInventoryType = InventoryItem | InventoryNoInput;
 

@@ -239,7 +239,7 @@ const ScanArea = () => {
     if (updated.__delete) {
       const filteredList = scannedData.filter(i => i.productId !== updated.productId);
       setScannedData(filteredList);
-      setSelectedItem(null); // 👈 đóng sheet luôn nếu cần
+      setSelectedItem(null);
       return;
     }
 

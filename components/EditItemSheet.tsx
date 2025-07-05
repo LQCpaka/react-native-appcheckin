@@ -32,13 +32,10 @@ const EditItemSheet = ({ item, onClose, onUpdate, paddingSheet }: Props) => {
         ? item.amountProductChecked + delta
         : item.amountProduct + delta;
 
-    // Nếu <= 0 thì xóa khỏi danh sách
     if (newAmount <= 0) {
-      onUpdate({ ...item, amountProductChecked: 0 }); // Optional: cập nhật trước khi xóa
+      onUpdate({ ...item, amountProductChecked: 0 });
 
-      // Gửi 1 signal để component cha (`ScanArea`) xoá item đó
-      onUpdate({ ...item, __delete: true }); // 👈 gợi ý thêm flag nếu bạn dùng trạng thái tạm
-      return;
+      onUpdate({ ...item, __delete: true }); return;
     }
 
     const updated = 'amountProductChecked' in item

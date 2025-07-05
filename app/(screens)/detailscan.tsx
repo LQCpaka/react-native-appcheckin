@@ -16,7 +16,7 @@ const DetailsScanScreen = () => {
       i.productId === updated.productId ? updated : i
     );
     setScannedData(updatedList);
-    setSelectedItem(updated); // để giữ sheet mở nếu bạn thích
+    setSelectedItem(updated);
   };
 
   return (

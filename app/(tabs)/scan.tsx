@@ -4,7 +4,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import ScanArea from "@/components/ScanArea";
-//====================| DATA FETCHING |==========================
 
 
 export default function Index() {

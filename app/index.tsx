@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const AuthScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn } = useAuth(); // ✅ bỏ forceSignIn
+  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     try {
