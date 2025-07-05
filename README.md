@@ -4,7 +4,6 @@
 
 <p align="center">
 
-  <img src="https://img.shields.io/github/license/LQCpaka/react-native-appcheckin">
   <img src="https://img.shields.io/badge/React-NativeExpo-red">
   <img src="https://img.shields.io/badge/Vietnam-⭐_Vietnamese-red">
   <img src="https://img.shields.io/badge/Language-Typescript-red">
