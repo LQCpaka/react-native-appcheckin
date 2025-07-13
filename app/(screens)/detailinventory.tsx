@@ -95,44 +95,41 @@ const Detailinventory = () => {
 
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <GestureHandlerRootView >
-        <SafeAreaView >
-          <View >
-            {/* <Text>Id: {ticketId}</Text> */}
-            <DataTable className="shadow-md rounded-md" style={{ marginTop: 10 }}>
-              <DataTable.Header style={{ backgroundColor: '#dddddd', boxShadow: 'md' }} className="shadow-md rounded-md">
-                <DataTable.Title style={{ flex: 1.5, justifyContent: 'center', }} textStyle={{ color: "black" }} >Mã sản phẩm</DataTable.Title>
-                <DataTable.Title style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "black" }}>Tên sản phẩm</DataTable.Title>
-                <DataTable.Title style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "black" }}>Số lượng</DataTable.Title>
-                <DataTable.Title style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "black" }}>Đã kiểm</DataTable.Title>
-              </DataTable.Header>
-              {/* Scroll View */}
-              {inventoryData.length !== 0 ? (
-                <ScrollView style={{ maxHeight: '90%' }}>
-                  {inventoryData.map((item) => (
-                    <DataTable.Row key={item._id}
-                      onPress={() => {
-                        setSelectedItem(item);
-                        sheetRef.current?.expand();
-                      }}                >
-                      <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productId}</DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productName}</DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProduct}</DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProductChecked}</DataTable.Cell>
-                    </DataTable.Row>
-                  ))}
-                </ScrollView>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+      <GestureHandlerRootView>
+        <View >
+          {/* <Text>Id: {ticketId}</Text> */}
+          <DataTable className="shadow-md rounded-md" >
+            <DataTable.Header style={{ backgroundColor: '#dddddd', boxShadow: 'md' }} className="shadow-md rounded-md">
+              <DataTable.Title style={{ flex: 1.5, justifyContent: 'center', }} textStyle={{ color: "black" }} >Mã sản phẩm</DataTable.Title>
+              <DataTable.Title style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "black" }}>Tên sản phẩm</DataTable.Title>
+              <DataTable.Title style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "black" }}>Số lượng</DataTable.Title>
+              <DataTable.Title style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "black" }}>Đã kiểm</DataTable.Title>
+            </DataTable.Header>
+            {/* Scroll View */}
+            {inventoryData.length !== 0 ? (
+              <ScrollView style={{ marginBottom: '20%' }}>
+                {inventoryData.map((item) => (
+                  <DataTable.Row key={item._id}
+                    onPress={() => {
+                      setSelectedItem(item);
+                      sheetRef.current?.expand();
+                    }}                >
+                    <DataTable.Cell style={{ flex: 1.5, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productId}</DataTable.Cell>
+                    <DataTable.Cell style={{ flex: 2, justifyContent: 'center' }} textStyle={{ color: "gray" }}>{item.productName}</DataTable.Cell>
+                    <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProduct}</DataTable.Cell>
+                    <DataTable.Cell style={{ flex: 1, justifyContent: 'flex-end' }} textStyle={{ color: "gray" }}>{item.amountProductChecked}</DataTable.Cell>
+                  </DataTable.Row>
+                ))}
+              </ScrollView>
 
-              ) : (
-                <View style={{ height: '75%' }} className=" items-center justify-center">
-                  <Image source={images.nodatafound} style={{ width: 200, height: 200 }} />
-                </View>
-              )}
-            </DataTable>
-
-          </View>
-        </SafeAreaView>
+            ) : (
+              <View style={{ height: '75%' }} className=" items-center justify-center">
+                <Image source={images.nodatafound} style={{ width: 200, height: 200 }} />
+              </View>
+            )}
+          </DataTable>
+        </View>
         <BottomSheet
           ref={sheetRef}
           enablePanDownToClose

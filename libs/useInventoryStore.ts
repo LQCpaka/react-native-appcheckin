@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { ScannedInventoryType } from '../types/Inventory';
 
-type InventoryType = 'HaveInput' | 'NoInput';
+export type InventoryType = 'HaveInput' | 'NoInput';
 
 type StoreState = {
   scannedData: ScannedInventoryType[];

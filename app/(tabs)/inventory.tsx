@@ -44,6 +44,7 @@ interface InventoryItem {
   ticketName: string;
   ticketType: string;
   ticketStatus: string;
+  ticketDescription: string;
   createdDate: string;
 }
 const containerStyle = {
@@ -150,7 +151,7 @@ const Inventory = () => {
 
 
         <FlatList
-          style={{ height: '70%', marginBottom: 20 }}
+          style={{ marginBottom: 60 }}
           data={filteredData}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => {
@@ -164,7 +165,11 @@ const Inventory = () => {
 
                 }
                 className='mx-4 rounded-md shadow'
-                style={{ backgroundColor: '#fff', padding: 10, marginBottom: 10 }}>
+                style={{
+                  backgroundColor: item.ticketDescription === 'Edited' ? '#FDDC5C' : '#fff',
+                  padding: 10,
+                  marginBottom: 10
+                }}>
                 <View style={{
                   width: 0,
                   height: 0,

@@ -10,29 +10,7 @@ import axios from 'axios';
 
 const screenWidth = Dimensions.get('window').width;
 
-const data = [
-  {
-    name: 'Red',
-    population: 215,
-    color: '#f00',
-    legendFontColor: '#7F7F7F',
-    legendFontSize: 15,
-  },
-  {
-    name: 'Green',
-    population: 280,
-    color: '#0f0',
-    legendFontColor: '#7F7F7F',
-    legendFontSize: 15,
-  },
-  {
-    name: 'Blue',
-    population: 527,
-    color: '#00f',
-    legendFontColor: '#7F7F7F',
-    legendFontSize: 15,
-  },
-];
+
 const items = [
   { id: '1', icon: 'cube-scan', label: 'QUÉT KIỂM', urlItem: '(tabs)/scan' },
   { id: '2', icon: 'sticker-text', label: 'PHIẾU KIỂM', urlItem: '(tabs)/inventory' },
@@ -196,13 +174,6 @@ const Home = () => {
           </View>
 
         </View>
-
-
-
-
-
-
-
       </View>
       <FlatList
         data={items}

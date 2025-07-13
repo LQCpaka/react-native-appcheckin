@@ -12,27 +12,32 @@ const settings = [
     title: 'Thông Tin Tài Khoản',
     bgColor: '#dddddd',
     icon: 'information-circle',
+    route: '(tabs)/profile'
   },
 
   {
     title: 'Phiếu kiểm kê',
     bgColor: '#f0e9e9',
-    icon: 'create-sharp'
+    icon: 'create-sharp',
+    route: '(tabs)/inventory'
   },
   {
-    title: 'Lịch Sử',
+    title: 'Phiếu Cũ',
     bgColor: '#dddddd',
-    icon: 'time'
+    icon: 'time',
+    route: '/(screens)/savedticket'
   },
   {
     title: 'Cài Đặt',
     bgColor: '#f0e9e9',
     icon: 'settings',
+    route: '(tabs)/settings'
   },
   {
     title: 'Hỗ Trợ',
     bgColor: '#dddddd',
-    icon: 'help-circle'
+    icon: 'help-circle',
+    route: '(tabs)/support'
   }
 ]
 
@@ -62,6 +67,7 @@ const ProfileScreen = () => {
           return (
             <TouchableOpacity
               key={item.title}
+              onPress={() => { router.push(item.route) }}
               style={{
                 marginVertical: "-3%",
                 paddingVertical: "3%",

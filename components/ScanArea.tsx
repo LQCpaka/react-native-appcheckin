@@ -1,21 +1,15 @@
 import axios from "axios";
-import { useRef, useState, useEffect, useCallback, useMemo } from "react";
-import { router, useFocusEffect, useGlobalSearchParams } from "expo-router";
+import { useRef, useState, useCallback, useMemo } from "react";
+import { router, useFocusEffect } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
 import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData, Image, Alert } from "react-native";
-import { Button, DataTable, Divider } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { Button, Divider } from "react-native-paper";
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Feather from '@expo/vector-icons/Feather';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { images } from "@/constant/images";
 
 import { useInventoryStore } from '@/libs/useInventoryStore';
@@ -207,6 +201,10 @@ const ScanArea = () => {
         };
 
         await axios.put(`${API_URL}/inventory/update`, payload);
+        await axios.put(`${API_URL}/ticket/description`, {
+          ticketId: ticketId,
+          description: 'Edited'
+        });
       }
 
       if (ticketType === 'NoInput') {
@@ -220,6 +218,10 @@ const ScanArea = () => {
         };
 
         await axios.post(`${API_URL}/no-input/update`, payload);
+        await axios.put(`${API_URL}/ticket/description`, {
+          ticketId: ticketId,
+          description: 'Edited'
+        });
       }
 
       Alert.alert('✔️ Thành công', 'Dữ liệu đã được cập nhật lên hệ thống!');
