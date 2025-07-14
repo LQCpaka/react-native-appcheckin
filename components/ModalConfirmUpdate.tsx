@@ -1,15 +1,17 @@
-import { AntDesign, FontAwesome } from '@expo/vector-icons';
-import { useState } from 'react';
+import { AntDesign } from '@expo/vector-icons';
 import { View, Text, TouchableOpacity } from 'react-native'
-import { DataTable, Divider, Modal, Searchbar, Portal, PaperProvider, Button } from 'react-native-paper';
+import { Modal, Portal } from 'react-native-paper';
 
 type ModalProps = {
+  description: string;
+  canelButtonText: string;
+  confirmButtonText: string;
   visible: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 };
 
-const ModalConfirmUpdate = ({ visible, onConfirm, onCancel }: ModalProps) => (
+const ModalConfirmUpdate = ({ description, canelButtonText, confirmButtonText, visible, onConfirm, onCancel }: ModalProps) => (
   <Portal>
     <Modal visible={visible} onDismiss={onCancel} contentContainerStyle={{ zIndex: 999, backgroundColor: 'white', padding: 20, margin: 20, borderRadius: 8 }}>
       <View style={{ alignItems: 'center' }}>

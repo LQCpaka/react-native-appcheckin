@@ -2,60 +2,56 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScannedInventoryType } from "@/types/Inventory";
 import { InventoryType } from "@/libs/useInventoryStore";
 
-type DraftData = {
-  scannedData: ScannedInventoryType[];
+export type SeparatedDraft = {
+  ticketId: string;
   ticketType: InventoryType;
-  timestamp: string;
+  scannedData: ScannedInventoryType[];
+  savedAt: string;
 }
 
-type AllDrafts = {
-  [ticketId: string]: DraftData;
+export const saveDraft = async (
+  username: string,
+  ticketId: string,
+  ticketType: InventoryType,
+  scannedData: ScannedInventoryType[]
+) => {
+  const timestamp = new Date().toISOString();
+  const key = `inventory_draft_${username}_${ticketId}_${timestamp}`;
+
+  const data: SeparatedDraft = {
+    ticketId,
+    ticketType,
+    scannedData,
+    savedAt: timestamp
+  }
+
+  await AsyncStorage.setItem(key, JSON.stringify(data));
 };
 
-export const saveDraft = async (username: string, ticketId: string, ticketType: InventoryType, scannedData: ScannedInventoryType[]) => {
-  const key = `inventory_drafts_${username}`;
-  const existing = await AsyncStorage.getItem(key);
-  const drafts: AllDrafts = existing ? JSON.parse(existing) : {};
+export const getDrafts = async (username: string): Promise<SeparatedDraft[]> => {
+  const keys = await AsyncStorage.getAllKeys();
+  const matchedKeys = keys.filter(k => k.startsWith(`inventory_draft_${username}_`));
+  const entries = await AsyncStorage.multiGet(matchedKeys);
+  return entries.map(([key, value]) => {
+    const parsed = JSON.parse(value ?? '{}');
+    return parsed as SeparatedDraft;
+  });
+};
 
-  drafts[ticketId] = {
-    scannedData,
-    ticketType,
-    timestamp: new Date().toISOString(),
-  };
+export const deleteDraft = async (key: string) => {
+  await AsyncStorage.removeItem(key);
+};
 
-  await AsyncStorage.setItem(key, JSON.stringify(drafts));
-}
-
-export const loadDraft = async (
+export const getLatestDraftForTicket = async (
   username: string,
   ticketId: string
-): Promise<DraftData | null> => {
+): Promise<SeparatedDraft | null> => {
+  const keys = await AsyncStorage.getAllKeys();
+  const matchedKeys = keys.filter(k => k.startsWith(`inventory_draft_${username}_${ticketId}_`))
 
-  const key = `inventory_drafts_${username}`;
-  const existing = await AsyncStorage.getItem(key);
-  if (!existing) return null;
+  if (matchedKeys.length === 0) return null;
 
-  const drafts: AllDrafts = JSON.parse(existing);
-  return drafts[ticketId] ?? null;
+  const sortedKeys = matchedKeys.sort().reverse();
+  const latestValue = await AsyncStorage.getItem(sortedKeys[0]);
+  return latestValue ? JSON.parse(latestValue) : null;
 }
-
-export const getAllDrafts = async (username: string): Promise<{ ticketId: string; info: DraftData }[]> => {
-  const key = `inventory_drafts_${username}`;
-  const existing = await AsyncStorage.getItem(key);
-  if (!existing) return [];
-
-  const drafts: AllDrafts = JSON.parse(existing);
-  return Object.entries(drafts).map(([ticketId, info]) => ({ ticketId, info }));
-};
-
-export const deleteDraft = async (username: string, ticketId: string) => {
-  const key = `inventory_drafts_${username}`;
-  const existing = await AsyncStorage.getItem(key);
-  if (!existing) return;
-
-  const drafts: AllDrafts = JSON.parse(existing);
-  delete drafts[ticketId];
-
-  await AsyncStorage.setItem(key, JSON.stringify(drafts));
-}
-

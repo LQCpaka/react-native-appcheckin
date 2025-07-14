@@ -17,6 +17,7 @@ import { getCheckedCount } from '@/utils/getCheckedCount';
 import EditItemSheet from "./EditItemSheet";
 import ModalConfirmDelete from "./ModalConfirmDelete";
 import ModalConfirmUpdate from "./ModalConfirmUpdate";
+import { saveDraft } from "@/services/draftManager";
 
 
 type InventoryType = 'HaveInput' | 'NoInput';
@@ -254,6 +255,7 @@ const ScanArea = () => {
 
 
   // ==============================| POPUP RESET DATA|=====================================
+
   const [confirmVisible, setConfirmVisible] = useState(false);
 
   const showConfirmModal = () => setConfirmVisible(true);
@@ -262,9 +264,9 @@ const ScanArea = () => {
   const { resetScannedData, setTicket } = useInventoryStore();
 
   const handleConfirmReset = () => {
-    resetScannedData();         // 🧼 Reset dữ liệu
-    setTicket('', 'HaveInput'); // 🧨 Hủy phiếu hiện tại
-    hideConfirmModal();         // Đóng modal
+    resetScannedData();         // Reset Scanned Data
+    setTicket('', 'HaveInput'); // Cancel current ticket
+    hideConfirmModal();
   };
 
   // ==============================| POPUP UPDATE DATA |=====================================
@@ -277,9 +279,25 @@ const ScanArea = () => {
 
   const handleConfirmUpdate = () => {
     sendDataToServer()
-    hideConfirmModalUpdate();         // Đóng modal
+    hideConfirmModalUpdate();
   };
 
+
+  // ==============================| SAVED DRAFTS |=====================================
+
+  const [confirmVisibleDraft, setConfirmVisibleDraft] = useState(false);
+
+  const showConfirmModalDraft = () => setConfirmVisibleDraft(true);
+  const hideConfirmModalDraft = () => setConfirmVisibleDraft(false);
+
+  const username = userInfo?.name;
+
+  const handleSaveDraft = () => {
+    saveDraft(username, ticketId, ticketType, scannedData);
+    resetScannedData();
+
+    hideConfirmModalDraft();
+  }
   return (
     <>
       <ScrollView contentContainerStyle={{ paddingBottom: 50 }} style={{ paddingTop: '2%' }} >
@@ -290,12 +308,27 @@ const ScanArea = () => {
               <MaterialCommunityIcons name="qrcode-scan" size={20} color="#aba4a4" />
               <Text className="font-semibold" style={{ marginLeft: 10, color: '#aba4a4' }}>{!ticketId ? 'Vui Lòng Chọn Phiếu' : ticketId}</Text>
             </View>
-            <TouchableOpacity onPress={() => {
-              inputRef.current?.focus();
-              inputRef.current?.setNativeProps({ text: '' });
-            }}>
-              <Ionicons name="reload-sharp" size={20} color="#aba4a4" style={{ marginTop: 10, }} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 20 }}>
+
+              {/* ===================| HANDLE SAVE DRAFTS |===========================*/}
+              {scannedData.length > 0 && (
+                <TouchableOpacity onPress={() => {
+                  showConfirmModalDraft();
+                }}>
+                  <Ionicons name="save" size={20} color="#aba4a4" style={{ marginTop: 10, }} />
+                </TouchableOpacity>
+              )}
+
+
+              {/* ===================| HANDLE RESET INPUT |===========================*/}
+              <TouchableOpacity onPress={() => {
+                inputRef.current?.focus();
+                inputRef.current?.setNativeProps({ text: '' });
+              }}>
+                <Ionicons name="reload-sharp" size={20} color="#aba4a4" style={{ marginTop: 10, }} />
+              </TouchableOpacity>
+            </View>
+
           </View>
           <Divider style={{ backgroundColor: '#aba4a4', marginHorizontal: '3%', marginTop: '3%' }} />
           <View style={{ marginVertical: '3%', marginHorizontal: 15 }}>
@@ -432,10 +465,23 @@ const ScanArea = () => {
       />
 
       <ModalConfirmUpdate
+        description="Bạn có muốn cập nhật dữ liệu kiểm kê hiện tại không?"
+        confirmButtonText="Xác nhận, Cập Nhật"
+        canelButtonText="Chưa vội"
         visible={confirmVisibleUpdate}
         onConfirm={handleConfirmUpdate}
         onCancel={hideConfirmModalUpdate}
       />
+
+      <ModalConfirmUpdate
+        description="Bạn có muốn lưu lần kiểm kê này không?"
+        confirmButtonText="Xác Nhận"
+        canelButtonText="Chưa vội"
+        visible={confirmVisibleDraft}
+        onConfirm={handleSaveDraft}
+        onCancel={hideConfirmModalDraft}
+      />
+
 
     </>
   )

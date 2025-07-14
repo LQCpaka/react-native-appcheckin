@@ -12,6 +12,14 @@ const _layout = () => {
         name="detailscan"
         options={{ title: 'Chi tiết quét kiểm kê' }}
       />
+      <Stack.Screen
+        name="detailsavedticket"
+        options={{ title: 'Chi tiết phiếu đã lưu' }}
+      />
+      <Stack.Screen
+        name="savedticket"
+        options={{ title: 'Phiếu kiểm kê đã lưu' }}
+      />
     </Stack >
   )
 }
