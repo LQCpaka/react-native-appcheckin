@@ -22,7 +22,7 @@ const settings = [
     route: '(tabs)/inventory'
   },
   {
-    title: 'Phiếu Cũ',
+    title: 'Phiếu Đã Lưu',
     bgColor: '#dddddd',
     icon: 'time',
     route: '/(screens)/savedticket'

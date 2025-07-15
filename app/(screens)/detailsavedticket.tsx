@@ -11,9 +11,12 @@ import { View, ScrollView, Image, TouchableOpacity, Alert, Text } from 'react-na
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DataTable, Modal, PaperProvider, Portal } from 'react-native-paper';
+import ModalConfirmUpdate from '@/components/ModalConfirmUpdate';
+import axios from 'axios';
 
 const Detailsavedticket = () => {
   const route = useRouter();
+  const API_URL = process.env.EXPO_PUBLIC_BEAPI_URL;
   const { ticketId, ticketType, timestamp } = useGlobalSearchParams();
   const { userInfo } = useAuth();
   const [scannedList, setScannedList] = useState([]);
@@ -51,6 +54,69 @@ const Detailsavedticket = () => {
     deleteDraft(key);
     hideConfirmDelete();
     route.back();
+  }
+  //=======================================| UPLOAD SUCCESS |========================================
+  const [isVisibleSuccess, setVisibleSuccess] = useState(false);
+
+  const showConfirmSuccess = () => {
+    setVisibleSuccess(true);
+  };
+  const hideConfirmSuccess = () => {
+    setVisibleSuccess(false);
+    route.push('/(tabs)/home');
+  };
+  const hideConfirmSuccessConfirm = () => {
+    setVisibleSuccess(false);
+    route.back();
+  };
+
+
+  //=======================================| UPLOAD POPUP |========================================
+  const [isVisibleUpload, setVisibleUpload] = useState(false);
+
+  const showConfirmUpload = () => setVisibleUpload(true);
+  const hideConfirmUpload = () => setVisibleUpload(false);
+
+  const handleUploadDraft = async () => {
+    try {
+      const username = userInfo?.name;
+      const payload = ticketType === 'HaveInput'
+        ? {
+          ticketId,
+          scannedData: scannedList.map((item) => ({
+            productId: item.productId,
+            checkedBy: username,
+            amountProductChecked: item.amountProductChecked,
+            productDescriptionA: item.productDescriptionA,
+            productDescriptionB: item.productDescriptionB,
+          }))
+        }
+        : {
+          ticketId,
+          scannedData: scannedList.map((item) => ({
+            productId: item.productId,
+            scannedBy: username,
+            scanCount: item.amountProduct,
+          }))
+        };
+
+      if (ticketType === 'HaveInput') {
+        await axios.put(`${API_URL}/inventory/update`, payload);
+      } else {
+        await axios.post(`${API_URL}/no-input/update`, payload);
+      }
+
+      await axios.put(`${API_URL}/ticket/description`, {
+        ticketId,
+        description: 'Edited',
+      });
+
+      await AsyncStorage.removeItem(`inventory_draft_${username}_${ticketId}_${timestamp}`);
+      showConfirmSuccess();
+    } catch (error) {
+      Alert.alert('Lỗi', 'Có lỗi xảy ra khi cập nhật phiếu. Vui lòng thử lại.');
+    }
+    hideConfirmUpload();
   }
   return (
     <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
@@ -153,6 +219,13 @@ const Detailsavedticket = () => {
           </BottomSheet>
           <TouchableOpacity
             onPress={() => {
+              showConfirmUpload()
+            }}
+            style={{ zIndex: -1, position: 'absolute', bottom: 110, right: 30, backgroundColor: '#2196f3', borderRadius: 30, width: 60, height: 60, justifyContent: 'center', alignItems: 'center', elevation: 5 }} >
+            <Ionicons name='cloud-upload-outline' color='white' size={24} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
               showConfirmDelete();
             }}
             style={{ zIndex: -1, position: 'absolute', bottom: 30, right: 30, backgroundColor: '#FF0000', borderRadius: 30, width: 60, height: 60, justifyContent: 'center', alignItems: 'center', elevation: 5 }} >
@@ -179,6 +252,24 @@ const Detailsavedticket = () => {
               </View>
             </Modal>
           </Portal>
+          <ModalConfirmUpdate
+            description='Bạn có chắc chắn muốn gửi dữ liệu đã lưu lên server không?'
+            canelButtonText='Chưa Vội'
+            confirmButtonText='Cập Nhật'
+            visible={isVisibleUpload}
+            onConfirm={handleUploadDraft}
+            onCancel={hideConfirmUpload}
+          />
+          <ModalConfirmUpdate
+            description='Cập nhật thành công!'
+            icon='checkcircleo'
+            canelButtonText='Trang Chủ'
+            confirmButtonText='Trở Lại'
+            visible={isVisibleSuccess}
+            onCancel={hideConfirmSuccess}
+            onConfirm={hideConfirmSuccessConfirm}
+
+          />
         </ GestureHandlerRootView>
       </PaperProvider>
     </SafeAreaView >

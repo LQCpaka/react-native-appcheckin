@@ -147,11 +147,11 @@ const Inventory = () => {
             backgroundColor: '#fff',
           }}
         />
-        <Divider style={{ marginVertical: 25, marginHorizontal: 10 }} />
+        <Divider style={{ marginVertical: 15, marginHorizontal: 10 }} />
 
 
         <FlatList
-          style={{ marginBottom: 60 }}
+          style={{ marginBottom: 120 }}
           data={filteredData}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => {
