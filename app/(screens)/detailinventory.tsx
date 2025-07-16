@@ -72,7 +72,7 @@ const Detailinventory = () => {
         { headers: { Accept: 'application/json' } })
 
         .then(response => {
-          console.log('API response:', response.data);
+          // console.log('API response:', response.data);
           if (Array.isArray(response.data)) {
             setInventoryData(response.data);
           } else {
