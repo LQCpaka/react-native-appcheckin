@@ -1,23 +1,23 @@
-import axios from "axios";
-import { useRef, useState, useCallback, useMemo } from "react";
-import { router, useFocusEffect } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-import { Text, TextInput, FlatList, View, ScrollView, TouchableOpacity, NativeSyntheticEvent, TextInputSubmitEditingEventData, Image, Alert } from "react-native";
+import { Alert, FlatList, Image, NativeSyntheticEvent, ScrollView, Text, TextInput, TextInputSubmitEditingEventData, TouchableOpacity, View } from "react-native";
 import { Button, Divider } from "react-native-paper";
 
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { images } from "@/constant/images";
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { images } from "@/constant/images";
 
 import { useInventoryStore } from '@/libs/useInventoryStore';
+import { saveDraft } from "@/services/draftManager";
 import { getCheckedCount } from '@/utils/getCheckedCount';
 import EditItemSheet from "./EditItemSheet";
 import ModalConfirmDelete from "./ModalConfirmDelete";
 import ModalConfirmUpdate from "./ModalConfirmUpdate";
-import { saveDraft } from "@/services/draftManager";
 
 
 type InventoryType = 'HaveInput' | 'NoInput';
@@ -93,9 +93,9 @@ const ScanArea = () => {
   };
   useFocusEffect(
     useCallback(() => {
-      setInventoryData([]); // 👈 Optional: clear trước khi fetch
-      fetchInventory();     // 👈 Tự fetch lại mỗi lần vào screen
-      return () => { };      // cleanup nếu cần
+      setInventoryData([]); 
+      fetchInventory();     
+      return () => { };      
     }, [ticketId, ticketType])
   );
 
